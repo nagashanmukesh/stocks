@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request
 import yfinance as yf
 import numpy as np
+import pandas as pd
 
 app = Flask(
     __name__,
@@ -8,7 +9,7 @@ app = Flask(
     static_folder='.'
 )
 
-# Serve CSS manually for flat structure
+# Serve CSS manually
 @app.route('/style.css')
 def serve_css():
     return app.send_static_file('style.css')
@@ -28,7 +29,7 @@ def normalize_symbol(symbol):
 
 # ---------------- FETCH DATA ---------------- #
 
-def fetch_closes(symbol):
+def fetch_stock_data(symbol):
 
     ticker = yf.Ticker(symbol)
 
@@ -44,7 +45,7 @@ def fetch_closes(symbol):
             "Try TCS, RELIANCE, INFY, HDFCBANK"
         )
 
-    return df["Close"].values.astype(float)
+    return df
 
 
 # ---------------- PRICE PREDICTION ---------------- #
@@ -62,7 +63,7 @@ def predict_next_price(closes):
     return round(float(predicted), 2)
 
 
-# ---------------- QUANT SIGNALS ---------------- #
+# ---------------- TREND ---------------- #
 
 def calculate_trend(closes):
 
@@ -76,6 +77,8 @@ def calculate_trend(closes):
         return "Bearish"
 
 
+# ---------------- MOMENTUM ---------------- #
+
 def calculate_momentum(closes):
 
     momentum = closes[-1] - closes[-7]
@@ -86,23 +89,64 @@ def calculate_momentum(closes):
         return "Weak"
 
 
+# ---------------- RISK ---------------- #
+
 def calculate_risk(closes):
 
     volatility = np.std(closes[-20:])
 
     if volatility < 20:
         return "Low"
+
     elif volatility < 50:
         return "Medium"
+
     else:
         return "High"
 
+
+# ---------------- CONFIDENCE ---------------- #
 
 def calculate_confidence(change_pct):
 
     confidence = 50 + abs(change_pct) * 5
 
     return min(round(confidence, 2), 95)
+
+
+# ---------------- RSI ---------------- #
+
+def calculate_rsi(closes, period=14):
+
+    deltas = np.diff(closes)
+
+    gains = np.where(deltas > 0, deltas, 0)
+
+    losses = np.where(deltas < 0, -deltas, 0)
+
+    avg_gain = np.mean(gains[-period:])
+
+    avg_loss = np.mean(losses[-period:])
+
+    if avg_loss == 0:
+        return 100
+
+    rs = avg_gain / avg_loss
+
+    rsi = 100 - (100 / (1 + rs))
+
+    return round(rsi, 2)
+
+
+# ---------------- PREDICTION RANGE ---------------- #
+
+def calculate_prediction_range(predicted_price):
+
+    lower = round(predicted_price * 0.98, 2)
+
+    upper = round(predicted_price * 1.02, 2)
+
+    return lower, upper
 
 
 # ---------------- MAIN ROUTE ---------------- #
@@ -118,6 +162,7 @@ def index():
         raw = request.form.get("symbol", "").strip()
 
         if not raw:
+
             error = "Please enter stock symbol."
 
         else:
@@ -125,7 +170,9 @@ def index():
 
                 symbol = normalize_symbol(raw)
 
-                closes = fetch_closes(symbol)
+                df = fetch_stock_data(symbol)
+
+                closes = df["Close"].values.astype(float)
 
                 current_price = round(float(closes[-1]), 2)
 
@@ -136,7 +183,7 @@ def index():
                     2
                 )
 
-                # -------- QUANT SIGNALS -------- #
+                # -------- SIGNALS -------- #
 
                 trend = calculate_trend(closes)
 
@@ -146,7 +193,35 @@ def index():
 
                 confidence = calculate_confidence(change_pct)
 
-                # -------- IMPROVED QUANT SCORING -------- #
+                rsi = calculate_rsi(closes)
+
+                lower_range, upper_range = calculate_prediction_range(
+                    predicted_price
+                )
+
+                # -------- VOLUME ANALYSIS -------- #
+
+                avg_volume = df["Volume"][-20:].mean()
+
+                latest_volume = df["Volume"].iloc[-1]
+
+                if latest_volume > avg_volume * 1.5:
+                    volume_signal = "High Activity"
+                else:
+                    volume_signal = "Normal"
+
+                # -------- SENTIMENT -------- #
+
+                if trend == "Bullish" and momentum == "Strong":
+                    sentiment = "Positive"
+
+                elif trend == "Bearish":
+                    sentiment = "Negative"
+
+                else:
+                    sentiment = "Neutral"
+
+                # -------- QUANT SCORE -------- #
 
                 score = 50
 
@@ -156,7 +231,7 @@ def index():
                 else:
                     score -= 20
 
-                # Trend strength
+                # Trend
                 if trend == "Bullish":
                     score += 15
                 else:
@@ -168,12 +243,10 @@ def index():
                 else:
                     score -= 5
 
-                # Risk analysis
+                # Risk
                 if risk == "Low":
                     score += 10
-                elif risk == "Medium":
-                    score += 0
-                else:
+                elif risk == "High":
                     score -= 10
 
                 # Confidence
@@ -184,10 +257,16 @@ def index():
                 else:
                     score -= 5
 
+                # RSI Logic
+                if rsi < 30:
+                    score += 10
+                elif rsi > 70:
+                    score -= 10
+
                 # Clamp score
                 score = max(0, min(score, 100))
 
-                # -------- FINAL RECOMMENDATION -------- #
+                # -------- FINAL SIGNAL -------- #
 
                 if score >= 75:
 
@@ -195,19 +274,11 @@ def index():
                     signal_class = "buy"
                     signal_icon = "↑"
 
-                    explanation = (
-                        "Strong bullish trend with favorable quant signals."
-                    )
-
                 elif score >= 50:
 
                     signal = "HOLD"
                     signal_class = "hold"
                     signal_icon = "→"
-
-                    explanation = (
-                        "Mixed market conditions with moderate confidence."
-                    )
 
                 else:
 
@@ -215,9 +286,29 @@ def index():
                     signal_class = "sell"
                     signal_icon = "↓"
 
-                    explanation = (
-                        "Weak momentum and higher downside risk detected."
-                    )
+                # -------- AI EXPLANATION -------- #
+
+                reasons = []
+
+                if trend == "Bullish":
+                    reasons.append("Bullish trend detected")
+
+                if momentum == "Strong":
+                    reasons.append("Strong market momentum")
+
+                if risk == "Low":
+                    reasons.append("Low volatility risk")
+
+                if confidence > 70:
+                    reasons.append("High confidence score")
+
+                if volume_signal == "High Activity":
+                    reasons.append("Unusual trading activity observed")
+
+                explanation = " • ".join(reasons)
+
+                if explanation == "":
+                    explanation = "Mixed quant market conditions detected"
 
                 # -------- RESULT -------- #
 
@@ -234,6 +325,11 @@ def index():
                     "risk": risk,
                     "confidence": confidence,
                     "score": score,
+                    "rsi": rsi,
+                    "prediction_lower": lower_range,
+                    "prediction_upper": upper_range,
+                    "volume_signal": volume_signal,
+                    "sentiment": sentiment,
                     "explanation": explanation
                 }
 
@@ -241,12 +337,9 @@ def index():
 
                 error = str(e)
 
-            except Exception:
+            except Exception as e:
 
-                error = (
-                    "Yahoo Finance rate limit reached. "
-                    "Try again after a minute."
-                )
+                error = f"Error: {str(e)}"
 
     return render_template(
         "index.html",
