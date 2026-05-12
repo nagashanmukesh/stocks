@@ -12,7 +12,7 @@ body {
   overflow-x: hidden;
 }
 
-/* BACKGROUND GLOW */
+/* BACKGROUND */
 
 .background-glow {
   position: fixed;
@@ -54,20 +54,20 @@ body {
 }
 
 .logo-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 14px;
+  width: 50px;
+  height: 50px;
+  border-radius: 16px;
   background: linear-gradient(135deg, #00ffcc, #0099ff);
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 24px;
   font-weight: 800;
   color: black;
-  font-size: 22px;
 }
 
 .logo-box h2 {
-  font-size: 22px;
+  font-size: 24px;
 }
 
 .logo-box p {
@@ -79,12 +79,12 @@ body {
   padding: 10px 18px;
   border-radius: 999px;
   background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.08);
   color: #cbd5e1;
   font-size: 13px;
 }
 
-/* MAIN CONTAINER */
+/* CONTAINER */
 
 .container {
   width: 100%;
@@ -97,7 +97,7 @@ body {
 
 .hero-section {
   text-align: center;
-  margin-bottom: 40px;
+  margin-bottom: 45px;
 }
 
 .hero-section h1 {
@@ -113,14 +113,14 @@ body {
 }
 
 .hero-section p {
-  max-width: 700px;
+  max-width: 720px;
   margin: auto;
   color: #94a3b8;
-  line-height: 1.7;
+  line-height: 1.8;
   font-size: 18px;
 }
 
-/* GLASS EFFECT */
+/* GLASS CARD */
 
 .glass-card {
   background: rgba(255,255,255,0.05);
@@ -152,6 +152,8 @@ body {
   font-size: 14px;
 }
 
+/* INPUT */
+
 .input-group {
   display: flex;
   gap: 14px;
@@ -159,8 +161,8 @@ body {
 
 .input-group input {
   flex: 1;
-  height: 60px;
-  border-radius: 16px;
+  height: 62px;
+  border-radius: 18px;
   border: 1px solid rgba(255,255,255,0.08);
   background: rgba(255,255,255,0.04);
   color: white;
@@ -174,13 +176,13 @@ body {
 }
 
 .input-group button {
-  width: 180px;
+  width: 190px;
   border: none;
-  border-radius: 16px;
+  border-radius: 18px;
   background: linear-gradient(135deg, #00ffcc, #0099ff);
   color: black;
-  font-weight: 700;
   font-size: 16px;
+  font-weight: 700;
   cursor: pointer;
   transition: 0.3s ease;
 }
@@ -193,18 +195,18 @@ body {
   display: none;
 }
 
-/* STOCK CHIPS */
+/* CHIPS */
 
 .chips-row {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
-  margin-top: 20px;
+  margin-top: 22px;
 }
 
 .chips-row button {
-  border: 1px solid rgba(255,255,255,0.1);
-  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.04);
   color: white;
   border-radius: 999px;
   padding: 10px 16px;
@@ -216,7 +218,7 @@ body {
   background: rgba(255,255,255,0.12);
 }
 
-/* RESULTS GRID */
+/* GRID */
 
 .results-grid {
   display: grid;
@@ -229,7 +231,7 @@ body {
   grid-column: span 2;
 }
 
-/* COMMON CARDS */
+/* CARDS */
 
 .stock-card,
 .metric-card,
@@ -239,7 +241,7 @@ body {
   padding: 28px;
 }
 
-/* STOCK CARD */
+/* STOCK */
 
 .stock-card {
   display: flex;
@@ -252,10 +254,10 @@ body {
   height: 14px;
   border-radius: 50%;
   background: #00ff99;
-  box-shadow: 0 0 20px #00ff99;
+  box-shadow: 0 0 18px #00ff99;
 }
 
-/* LABELS */
+/* LABEL */
 
 .label {
   color: #94a3b8;
@@ -263,7 +265,7 @@ body {
   font-size: 14px;
 }
 
-/* METRIC CARDS */
+/* METRIC */
 
 .metric-card {
   transition: 0.3s ease;
@@ -285,7 +287,7 @@ body {
   font-size: 14px;
 }
 
-/* SIGNAL CARD */
+/* SIGNAL */
 
 .signal-card {
   display: flex;
@@ -301,13 +303,13 @@ body {
 }
 
 .signal-icon {
-  width: 70px;
-  height: 70px;
+  width: 74px;
+  height: 74px;
   border-radius: 18px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 32px;
+  font-size: 34px;
   font-weight: 800;
 }
 
@@ -322,7 +324,7 @@ body {
 }
 
 .hold .signal-icon {
-  background: rgba(255, 200, 0, 0.12);
+  background: rgba(255,200,0,0.12);
   color: #facc15;
 }
 
@@ -331,22 +333,16 @@ body {
 }
 
 .signal-right {
-  color: #cbd5e1;
   max-width: 320px;
   line-height: 1.8;
+  color: #cbd5e1;
 }
 
-/* INFO SECTION */
+/* INFO */
 
 .info-card h3 {
-  margin-bottom: 18px;
   font-size: 24px;
-}
-
-.info-card ul {
-  padding-left: 20px;
-  line-height: 2;
-  color: #cbd5e1;
+  margin-bottom: 18px;
 }
 
 .explanation-text {
@@ -383,17 +379,17 @@ body {
 
 @media(max-width: 768px) {
 
+  .navbar {
+    flex-direction: column;
+    gap: 20px;
+  }
+
   .hero-section h1 {
     font-size: 40px;
   }
 
   .hero-section p {
     font-size: 16px;
-  }
-
-  .navbar {
-    flex-direction: column;
-    gap: 20px;
   }
 
   .input-group {
