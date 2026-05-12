@@ -1,209 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>NSE Quant Terminal</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@300;400;500;600&display=swap" rel="stylesheet" />
-  
-  <!-- Critical: Added fallback CSS loading -->
-  <link rel="stylesheet" href="/style.css" />
-  
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-  <style>
-    /* Fallback CSS in case /style.css fails to load */
-    .hidden { display: none !important; }
-  </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test - NSE Quant</title>
+  <link rel="stylesheet" href="/style.css">
 </head>
 <body>
-  <div class="bg-grid"></div>
-  <div class="bg-glow"></div>
-
-  <!-- NAVBAR -->
-  <nav class="navbar">
-    <div class="nav-left">
-      <span class="nav-logo"><span class="logo-bracket">[</span>QT<span class="logo-bracket">]</span></span>
-      <span class="nav-title">NSE Quant Terminal</span>
-    </div>
-    <div class="nav-right">
-      <span class="nav-badge">LIVE</span>
-      <span class="nav-time" id="liveTime"></span>
-    </div>
-  </nav>
-
-  <!-- HERO -->
-  <section class="hero">
-    <div class="hero-tagline">
-      <span class="tag-line-accent">Statistical Alpha Engine</span>
-      <h1 class="hero-heading">NSE Quant Dashboard</h1>
-      <p class="hero-sub">Regression · Momentum · RSI · Volatility · Quant Signals</p>
-    </div>
-
-    <div class="search-wrapper">
-      <div class="search-box">
-        <span class="search-icon">⬡</span>
-        <input type="text" id="stockInput" class="search-input" 
-               placeholder="Enter NSE ticker (RELIANCE, TCS, INFY...)" 
-               autocomplete="off" spellcheck="false" />
-        <button class="search-btn" id="analyzeBtn" onclick="analyzeStock()">ANALYZE →</button>
-      </div>
-      <div class="suggestions" id="suggestions"></div>
-    </div>
-
-    <div class="quick-picks">
-      <span class="qp-label">QUICK PICKS :</span>
-      <button class="qp-chip" onclick="quickAnalyze('RELIANCE')">RELIANCE</button>
-      <button class="qp-chip" onclick="quickAnalyze('TCS')">TCS</button>
-      <button class="qp-chip" onclick="quickAnalyze('INFY')">INFY</button>
-      <button class="qp-chip" onclick="quickAnalyze('SBIN')">SBIN</button>
-      <button class="qp-chip" onclick="quickAnalyze('HDFCBANK')">HDFCBANK</button>
-    </div>
-  </section>
-
-  <!-- LOADER -->
-  <div class="loader-wrapper hidden" id="loader">
-    <div class="loader-box">
-      <div class="loader-ring"></div>
-      <div class="loader-lines">
-        <span class="lline" id="ll1">Fetching market data...</span>
-        <span class="lline" id="ll2">Running quant analysis...</span>
-        <span class="lline" id="ll3">Computing predictions...</span>
-        <span class="lline" id="ll4">Finalizing dashboard...</span>
-      </div>
-      <div class="loader-note" id="loaderNote"></div>
-    </div>
-  </div>
-
-  <!-- ERROR -->
-  <div class="error-wrapper hidden" id="errorBox">
-    <div class="error-card">
-      <span class="error-icon">✕</span>
-      <p class="error-msg" id="errorMsg"></p>
-      <button class="error-dismiss" onclick="dismissError()">DISMISS</button>
-    </div>
-  </div>
-
-  <!-- RESULTS -->
-  <main class="results hidden" id="results">
-    <!-- Your existing results HTML remains exactly the same -->
-    <div class="stock-header">
-      <div class="sh-left">
-        <div class="sh-ticker" id="sh_ticker"></div>
-        <div class="sh-name" id="sh_name"></div>
-      </div>
-      <div class="sh-right">
-        <div class="sh-price" id="sh_price"></div>
-        <div class="sh-change" id="sh_change"></div>
-      </div>
-    </div>
-
-    <div class="metrics-grid"> ... </div>   <!-- Keep your existing metrics grid -->
-
-    <div class="card pred-card"> ... </div>
-    <div class="card chart-card"> ... </div>
-    <div class="card explain-card"> ... </div>
-  </main>
+  <h1>✅ Basic Test Page</h1>
+  <p>Server is working!</p>
+  <button onclick="testAnalyze()">Test Analyze</button>
 
   <script>
-    // === Your existing JS with improvements ===
-
-    let chartInstance = null;
-    let _analysisRunning = false;
-    let _abortController = null;
-    let _loaderTimer = null;
-
-    function updateClock() {
-      document.getElementById('liveTime').textContent = new Date().toLocaleTimeString('en-IN');
+    async function testAnalyze() {
+      const res = await fetch('/analyze', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({symbol: "RELIANCE"})
+      });
+      const data = await res.json();
+      alert(JSON.stringify(data, null, 2));
     }
-    setInterval(updateClock, 1000);
-    updateClock();
-
-    // Show/Hide helpers
-    function showLoader() {
-      document.getElementById('results').classList.add('hidden');
-      document.getElementById('errorBox').classList.add('hidden');
-      document.getElementById('loader').classList.remove('hidden');
-      document.getElementById('loaderNote').textContent = '';
-
-      _loaderTimer = setTimeout(() => {
-        document.getElementById('loaderNote').textContent = 
-          '⚠️ Render free tier is waking up... This may take 10-15 seconds.';
-      }, 7000);
-    }
-
-    function hideLoader() {
-      document.getElementById('loader').classList.add('hidden');
-      if (_loaderTimer) clearTimeout(_loaderTimer);
-    }
-
-    function showError(msg) {
-      hideLoader();
-      document.getElementById('errorMsg').textContent = msg;
-      document.getElementById('errorBox').classList.remove('hidden');
-    }
-
-    function dismissError() {
-      document.getElementById('errorBox').classList.add('hidden');
-    }
-
-    async function analyzeStock() {
-      if (_analysisRunning) return;
-      
-      const symbol = document.getElementById('stockInput').value.trim().toUpperCase();
-      if (!symbol) {
-        showError("Please enter a stock symbol");
-        return;
-      }
-
-      _analysisRunning = true;
-      document.getElementById('analyzeBtn').disabled = true;
-      showLoader();
-
-      if (_abortController) _abortController.abort();
-      _abortController = new AbortController();
-
-      try {
-        const res = await fetch('/analyze', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ symbol }),
-          signal: _abortController.signal
-        });
-
-        hideLoader();
-
-        const data = await res.json();
-
-        if (!res.ok || data.error) {
-          showError(data.error || `Server error (${res.status})`);
-          return;
-        }
-
-        renderResults(data);
-
-      } catch (err) {
-        hideLoader();
-        if (err.name === 'AbortError') {
-          showError('Request timed out. Try again in a few seconds.');
-        } else {
-          showError('Failed to connect to server. Check if backend is running.');
-        }
-      } finally {
-        _analysisRunning = false;
-        document.getElementById('analyzeBtn').disabled = false;
-      }
-    }
-
-    // Keep your existing renderResults(), renderChart(), etc. functions...
-    // (They are mostly fine - I can optimize them later if needed)
-
-    function quickAnalyze(sym) {
-      document.getElementById('stockInput').value = sym;
-      analyzeStock();
-    }
-
-    // ... rest of your JS (suggestions, chart, etc.)
   </script>
 </body>
 </html>
