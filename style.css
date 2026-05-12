@@ -225,7 +225,7 @@ body {
 }
 
 .metric-card h2 {
-  font-size: 40px;
+  font-size: 34px;
 }
 
 .signal-card {
@@ -259,6 +259,11 @@ body {
 .sell .signal-icon {
   background: rgba(255,80,80,0.12);
   color: #ff7b7b;
+}
+
+.hold .signal-icon {
+  background: rgba(255, 200, 0, 0.12);
+  color: #facc15;
 }
 
 .signal-card h1 {
