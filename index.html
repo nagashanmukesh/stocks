@@ -50,7 +50,7 @@
     </h1>
 
     <p>
-      Analyze Indian NSE stocks using trend, momentum, volatility, confidence scoring and quant-based signals.
+      Analyze Indian NSE stocks using quantitative trend, momentum, RSI, volatility and statistical signal analysis.
     </p>
 
   </section>
@@ -90,13 +90,9 @@
       <div class="chips-row">
 
         <button type="button" onclick="setTicker('TCS')">TCS</button>
-
         <button type="button" onclick="setTicker('RELIANCE')">RELIANCE</button>
-
         <button type="button" onclick="setTicker('INFY')">INFY</button>
-
         <button type="button" onclick="setTicker('HDFCBANK')">HDFCBANK</button>
-
         <button type="button" onclick="setTicker('WIPRO')">WIPRO</button>
 
       </div>
@@ -114,6 +110,8 @@
   {% endif %}
 
   {% if result %}
+
+  <!-- MAIN RESULTS -->
 
   <section class="results-grid">
 
@@ -147,13 +145,9 @@
       <span>
 
         {% if result.change_pct > 0 %}
-
           ▲ +{{ result.change_pct }}%
-
         {% else %}
-
           ▼ {{ result.change_pct }}%
-
         {% endif %}
 
       </span>
@@ -180,19 +174,7 @@
 
       <div class="signal-right">
 
-        {% if result.signal == 'BUY' %}
-
-          Quant model indicates bullish probability.
-
-        {% elif result.signal == 'HOLD' %}
-
-          Market conditions appear neutral currently.
-
-        {% else %}
-
-          Quant signals indicate downside risk.
-
-        {% endif %}
+        {{ result.explanation }}
 
       </div>
 
@@ -200,7 +182,7 @@
 
   </section>
 
-  <!-- QUANT ANALYTICS SECTION -->
+  <!-- QUANT ANALYTICS -->
 
   <section class="results-grid">
 
@@ -224,6 +206,30 @@
       <h2>{{ result.confidence }}%</h2>
     </div>
 
+    <div class="glass-card metric-card">
+      <p class="label">RSI</p>
+      <h2>{{ result.rsi }}</h2>
+    </div>
+
+    <div class="glass-card metric-card">
+      <p class="label">Sentiment</p>
+      <h2>{{ result.sentiment }}</h2>
+    </div>
+
+    <div class="glass-card metric-card">
+      <p class="label">Volume</p>
+      <h2>{{ result.volume_signal }}</h2>
+    </div>
+
+    <div class="glass-card metric-card">
+      <p class="label">Prediction Range</p>
+      <h2>
+        ₹{{ result.prediction_lower }}
+        -
+        ₹{{ result.prediction_upper }}
+      </h2>
+    </div>
+
     <div class="glass-card metric-card full-width">
       <p class="label">Quant Score</p>
       <h2>{{ result.score }}/100</h2>
@@ -231,7 +237,21 @@
 
   </section>
 
+  <!-- AI EXPLANATION -->
+
+  <section class="glass-card info-card">
+
+    <h3>AI Quant Explanation</h3>
+
+    <p class="explanation-text">
+      {{ result.explanation }}
+    </p>
+
+  </section>
+
   {% endif %}
+
+  <!-- INFO SECTION -->
 
   <section class="glass-card info-card">
 
@@ -241,13 +261,15 @@
 
       <li>Fetches NSE stock data using Yahoo Finance</li>
 
-      <li>Uses NumPy quantitative trend analysis</li>
+      <li>Uses quantitative trend and momentum analysis</li>
 
-      <li>Calculates volatility-based risk scoring</li>
+      <li>Calculates RSI and volatility-based risk scoring</li>
 
-      <li>Generates BUY / HOLD / SELL recommendation</li>
+      <li>Performs statistical prediction modeling</li>
 
-      <li>Inspired by quantitative investing systems</li>
+      <li>Generates BUY / HOLD / SELL recommendations</li>
+
+      <li>Inspired by quantitative investing concepts</li>
 
     </ul>
 
