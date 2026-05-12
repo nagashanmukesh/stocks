@@ -8,13 +8,14 @@ app = Flask(
     static_folder='.'
 )
 
-# IMPORTANT: serve root CSS manually
+# Serve CSS manually for flat structure
 @app.route('/style.css')
 def serve_css():
     return app.send_static_file('style.css')
 
 
 def normalize_symbol(symbol):
+
     symbol = symbol.strip().upper()
 
     if not symbol.endswith(".NS"):
@@ -55,6 +56,51 @@ def predict_next_price(closes):
     return round(float(predicted), 2)
 
 
+# -------- QUANT SIGNALS -------- #
+
+def calculate_trend(closes):
+
+    short_ma = np.mean(closes[-5:])
+
+    long_ma = np.mean(closes[-20:])
+
+    if short_ma > long_ma:
+        return "Bullish"
+    else:
+        return "Bearish"
+
+
+def calculate_momentum(closes):
+
+    momentum = closes[-1] - closes[-7]
+
+    if momentum > 0:
+        return "Strong"
+    else:
+        return "Weak"
+
+
+def calculate_risk(closes):
+
+    volatility = np.std(closes[-20:])
+
+    if volatility < 20:
+        return "Low"
+    elif volatility < 50:
+        return "Medium"
+    else:
+        return "High"
+
+
+def calculate_confidence(change_pct):
+
+    confidence = 50 + abs(change_pct) * 5
+
+    return min(round(confidence, 2), 95)
+
+
+# -------- MAIN ROUTE -------- #
+
 @app.route("/", methods=["GET", "POST"])
 def index():
 
@@ -67,6 +113,7 @@ def index():
 
         if not raw:
             error = "Please enter stock symbol."
+
         else:
             try:
 
@@ -83,10 +130,43 @@ def index():
                     2
                 )
 
-                if predicted_price > current_price:
+                # Quant signals
+                trend = calculate_trend(closes)
+
+                momentum = calculate_momentum(closes)
+
+                risk = calculate_risk(closes)
+
+                confidence = calculate_confidence(change_pct)
+
+                # Quant scoring
+                score = 50
+
+                if trend == "Bullish":
+                    score += 20
+                else:
+                    score -= 10
+
+                if momentum == "Strong":
+                    score += 15
+
+                if risk == "Low":
+                    score += 10
+
+                if confidence > 70:
+                    score += 10
+
+                # Final recommendation
+                if score >= 75:
                     signal = "BUY"
                     signal_class = "buy"
                     signal_icon = "↑"
+
+                elif score >= 50:
+                    signal = "HOLD"
+                    signal_class = "hold"
+                    signal_icon = "→"
+
                 else:
                     signal = "SELL"
                     signal_class = "sell"
@@ -99,13 +179,20 @@ def index():
                     "change_pct": change_pct,
                     "signal": signal,
                     "signal_class": signal_class,
-                    "signal_icon": signal_icon
+                    "signal_icon": signal_icon,
+                    "trend": trend,
+                    "momentum": momentum,
+                    "risk": risk,
+                    "confidence": confidence,
+                    "score": score
                 }
 
             except ValueError as e:
+
                 error = str(e)
 
             except Exception:
+
                 error = "Yahoo Finance rate limit reached. Try again after a minute."
 
     return render_template(
