@@ -1,5 +1,6 @@
-flask
-yfinance
-numpy
-pandas
-gunicorn
+flask==3.0.3
+yfinance==0.2.40
+numpy==1.26.4
+pandas==2.2.2
+textblob==0.18.0.post0
+gunicorn==22.0.0
