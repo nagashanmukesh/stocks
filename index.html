@@ -1,23 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
   <title>NSE Quant Terminal</title>
-
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-
   <link
     href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@300;400;500;600&display=swap"
     rel="stylesheet"
   />
-
   <link rel="stylesheet" href="/style.css" />
-
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-
 </head>
 
 <body>
@@ -26,56 +19,31 @@
   <div class="bg-glow"></div>
 
   <!-- NAVBAR -->
-
   <nav class="navbar">
-
     <div class="nav-left">
       <span class="nav-logo">
-        <span class="logo-bracket">[</span>
-        QT
-        <span class="logo-bracket">]</span>
+        <span class="logo-bracket">[</span>QT<span class="logo-bracket">]</span>
       </span>
-
-      <span class="nav-title">
-        NSE Quant Terminal
-      </span>
+      <span class="nav-title">NSE Quant Terminal</span>
     </div>
-
     <div class="nav-right">
       <span class="nav-badge">LIVE</span>
       <span class="nav-time" id="liveTime"></span>
     </div>
-
   </nav>
 
   <!-- HERO -->
-
   <section class="hero">
-
     <div class="hero-tagline">
-
-      <span class="tag-line-accent">
-        Statistical Alpha Engine
-      </span>
-
-      <h1 class="hero-heading">
-        NSE Quant Dashboard
-      </h1>
-
-      <p class="hero-sub">
-        Regression · Momentum · RSI · Volatility · Quant Signals
-      </p>
-
+      <span class="tag-line-accent">Statistical Alpha Engine</span>
+      <h1 class="hero-heading">NSE Quant Dashboard</h1>
+      <p class="hero-sub">Regression · Momentum · RSI · Volatility · Quant Signals</p>
     </div>
 
     <!-- SEARCH -->
-
     <div class="search-wrapper">
-
       <div class="search-box">
-
         <span class="search-icon">⬡</span>
-
         <input
           type="text"
           id="stockInput"
@@ -84,660 +52,427 @@
           autocomplete="off"
           spellcheck="false"
         />
-
-        <button
-          class="search-btn"
-          onclick="analyzeStock()"
-        >
-          ANALYZE →
-        </button>
-
+        <button class="search-btn" id="analyzeBtn" onclick="analyzeStock()">ANALYZE →</button>
       </div>
-
-      <div
-        class="suggestions"
-        id="suggestions"
-      ></div>
-
+      <div class="suggestions" id="suggestions"></div>
     </div>
 
     <!-- QUICK PICKS -->
-
     <div class="quick-picks">
-
       <span class="qp-label">QUICK PICKS :</span>
-
       <button class="qp-chip" onclick="quickAnalyze('RELIANCE')">RELIANCE</button>
       <button class="qp-chip" onclick="quickAnalyze('TCS')">TCS</button>
       <button class="qp-chip" onclick="quickAnalyze('INFY')">INFY</button>
       <button class="qp-chip" onclick="quickAnalyze('SBIN')">SBIN</button>
       <button class="qp-chip" onclick="quickAnalyze('HDFCBANK')">HDFCBANK</button>
-
     </div>
-
   </section>
 
   <!-- LOADER -->
-
-  <div
-    class="loader-wrapper"
-    id="loader"
-    style="display:none"
-  >
-
+  <div class="loader-wrapper" id="loader" style="display:none">
     <div class="loader-box">
-
       <div class="loader-ring"></div>
-
       <div class="loader-lines">
-
-        <span class="lline" id="ll1">
-          Fetching market data...
-        </span>
-
-        <span class="lline" id="ll2">
-          Running quant analysis...
-        </span>
-
-        <span class="lline" id="ll3">
-          Computing predictions...
-        </span>
-
-        <span class="lline" id="ll4">
-          Finalizing dashboard...
-        </span>
-
+        <span class="lline" id="ll1">Fetching market data...</span>
+        <span class="lline" id="ll2">Running quant analysis...</span>
+        <span class="lline" id="ll3">Computing predictions...</span>
+        <span class="lline" id="ll4">Finalizing dashboard...</span>
       </div>
-
+      <div class="loader-note" id="loaderNote"></div>
     </div>
-
   </div>
 
   <!-- ERROR -->
-
-  <div
-    class="error-wrapper"
-    id="errorBox"
-    style="display:none"
-  >
-
+  <div class="error-wrapper" id="errorBox" style="display:none">
     <div class="error-card">
-
       <span class="error-icon">✕</span>
-
-      <p
-        class="error-msg"
-        id="errorMsg"
-      ></p>
-
-      <button
-        class="error-dismiss"
-        onclick="dismissError()"
-      >
-        DISMISS
-      </button>
-
+      <p class="error-msg" id="errorMsg"></p>
+      <button class="error-dismiss" onclick="dismissError()">DISMISS</button>
     </div>
-
   </div>
 
   <!-- RESULTS -->
-
-  <main
-    class="results"
-    id="results"
-    style="display:none"
-  >
+  <main class="results" id="results" style="display:none">
 
     <!-- HEADER -->
-
     <div class="stock-header">
-
       <div class="sh-left">
-
-        <div
-          class="sh-ticker"
-          id="sh_ticker"
-        ></div>
-
-        <div
-          class="sh-name"
-          id="sh_name"
-        ></div>
-
+        <div class="sh-ticker" id="sh_ticker"></div>
+        <div class="sh-name"   id="sh_name"></div>
       </div>
-
       <div class="sh-right">
-
-        <div
-          class="sh-price"
-          id="sh_price"
-        ></div>
-
-        <div
-          class="sh-change"
-          id="sh_change"
-        ></div>
-
+        <div class="sh-price"  id="sh_price"></div>
+        <div class="sh-change" id="sh_change"></div>
       </div>
-
     </div>
 
     <!-- METRICS -->
-
     <div class="metrics-grid">
-
       <div class="metric-card">
         <div class="mc-title">RECOMMENDATION</div>
         <div class="mc-value" id="mc_rec"></div>
       </div>
-
       <div class="metric-card">
         <div class="mc-title">QUANT SCORE</div>
         <div class="mc-value" id="mc_quant"></div>
       </div>
-
       <div class="metric-card">
         <div class="mc-title">CONFIDENCE</div>
         <div class="mc-value" id="mc_conf"></div>
       </div>
-
       <div class="metric-card">
         <div class="mc-title">TREND</div>
         <div class="mc-value" id="mc_trend"></div>
       </div>
-
       <div class="metric-card">
         <div class="mc-title">MOMENTUM</div>
         <div class="mc-value" id="mc_momentum"></div>
       </div>
-
       <div class="metric-card">
         <div class="mc-title">RSI</div>
         <div class="mc-value" id="mc_rsi"></div>
       </div>
-
       <div class="metric-card">
         <div class="mc-title">VOLATILITY</div>
         <div class="mc-value" id="mc_vol"></div>
       </div>
-
       <div class="metric-card">
         <div class="mc-title">VOLUME</div>
         <div class="mc-value" id="mc_volume"></div>
       </div>
-
     </div>
 
     <!-- PREDICTION -->
-
     <div class="card pred-card">
-
-      <div class="card-label">
-        NEXT DAY PROJECTION
-      </div>
-
+      <div class="card-label">NEXT DAY PROJECTION</div>
       <div class="prediction-row">
-
         <div>
-          <div class="pred-label">
-            CURRENT
-          </div>
-
-          <div
-            class="pred-value"
-            id="pred_current"
-          ></div>
+          <div class="pred-label">CURRENT</div>
+          <div class="pred-value" id="pred_current"></div>
         </div>
-
-        <div class="pred-arrow">
-          →
-        </div>
-
+        <div class="pred-arrow">→</div>
         <div>
-          <div class="pred-label">
-            PROJECTED
-          </div>
-
-          <div
-            class="pred-value pred-green"
-            id="pred_future"
-          ></div>
+          <div class="pred-label">PROJECTED</div>
+          <div class="pred-value pred-green" id="pred_future"></div>
         </div>
-
       </div>
-
-      <div
-        class="pred-range"
-        id="pred_range"
-      ></div>
-
+      <div class="pred-range" id="pred_range"></div>
     </div>
 
     <!-- CHART -->
-
     <div class="card chart-card">
-
-      <div class="chart-title">
-        30 DAY PRICE ACTION
-      </div>
-
+      <div class="chart-title">30 DAY PRICE ACTION</div>
       <div class="chart-container">
         <canvas id="priceChart"></canvas>
       </div>
-
     </div>
 
     <!-- EXPLANATIONS -->
-
     <div class="card explain-card">
-
-      <div class="explain-title">
-        AI QUANT EXPLANATION
-      </div>
-
-      <div
-        class="explain-list"
-        id="explainList"
-      ></div>
-
+      <div class="explain-title">QUANT ANALYSIS BREAKDOWN</div>
+      <div class="explain-list" id="explainList"></div>
     </div>
 
   </main>
 
   <!-- SCRIPT -->
-
   <script>
-
-    // LIVE CLOCK
-
+    /* ── Clock ─────────────────────────────────────────────────────────── */
     function updateClock() {
-
-      const now = new Date();
-
       document.getElementById('liveTime').textContent =
-        now.toLocaleTimeString('en-IN');
-
+        new Date().toLocaleTimeString('en-IN');
     }
-
     setInterval(updateClock, 1000);
-
     updateClock();
 
-    // SEARCH
-
+    /* ── Search suggestions ─────────────────────────────────────────────── */
     let suggestionsData = [];
 
     fetch('/search')
       .then(r => r.json())
-      .then(d => {
-        suggestionsData = d;
-      })
-      .catch(() => {
-        suggestionsData = [];
-      });
+      .then(d => { suggestionsData = d; })
+      .catch(() => { suggestionsData = []; });
 
     const stockInput = document.getElementById('stockInput');
-
     const suggestBox = document.getElementById('suggestions');
 
     stockInput.addEventListener('input', () => {
-
       const q = stockInput.value.trim().toUpperCase();
-
-      if (!q) {
-        suggestBox.style.display = 'none';
-        return;
-      }
+      if (!q) { suggestBox.style.display = 'none'; return; }
 
       const matches = suggestionsData
-        .filter(s =>
-          s.symbol.startsWith(q) ||
-          s.name.toUpperCase().includes(q)
-        )
+        .filter(s => s.symbol.startsWith(q) || s.name.toUpperCase().includes(q))
         .slice(0, 6);
 
-      if (!matches.length) {
-        suggestBox.style.display = 'none';
-        return;
-      }
+      if (!matches.length) { suggestBox.style.display = 'none'; return; }
 
       suggestBox.innerHTML = matches.map(m => `
-        <div class="sug-item"
-             onclick="selectSuggestion('${m.symbol}')">
+        <div class="sug-item" onclick="selectSuggestion('${m.symbol}')">
           <span class="sug-sym">${m.symbol}</span>
           <span class="sug-name">${m.name}</span>
         </div>
       `).join('');
-
       suggestBox.style.display = 'block';
+    });
 
+    stockInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter') analyzeStock();
     });
 
     function selectSuggestion(sym) {
-
       stockInput.value = sym;
-
       suggestBox.style.display = 'none';
-
       analyzeStock();
-
     }
 
     function quickAnalyze(sym) {
-
       stockInput.value = sym;
-
       analyzeStock();
-
     }
 
     document.addEventListener('click', e => {
-
       if (!e.target.closest('.search-wrapper')) {
         suggestBox.style.display = 'none';
       }
-
     });
 
-    // CHART
-
+    /* ── Chart instance ─────────────────────────────────────────────────── */
     let chartInstance = null;
 
-    // MAIN ANALYSIS
+    /* ── State guard ────────────────────────────────────────────────────── */
+    let _analysisRunning = false;
+    let _loaderTimer     = null;
+    let _abortController = null;
 
+    /* ── Loader helpers ─────────────────────────────────────────────────── */
+    function showLoader() {
+      document.getElementById('results').style.display   = 'none';
+      document.getElementById('errorBox').style.display  = 'none';
+      document.getElementById('loaderNote').textContent  = '';
+
+      const loader = document.getElementById('loader');
+      loader.style.display = 'flex';
+
+      // Warn user after 8 s (Render free-tier cold start)
+      _loaderTimer = setTimeout(() => {
+        document.getElementById('loaderNote').textContent =
+          'Render free tier may be waking up — please wait a moment…';
+      }, 8000);
+    }
+
+    function hideLoader() {
+      document.getElementById('loader').style.display = 'none';
+      if (_loaderTimer) { clearTimeout(_loaderTimer); _loaderTimer = null; }
+    }
+
+    /* ── Main analysis ──────────────────────────────────────────────────── */
     async function analyzeStock() {
+      if (_analysisRunning) return;
 
       const symbol = stockInput.value.trim();
+      if (!symbol) { showError('Please enter a stock symbol.'); return; }
 
-      if (!symbol) {
-        showError('Please enter stock symbol.');
-        return;
-      }
+      _analysisRunning = true;
+      document.getElementById('analyzeBtn').disabled = true;
 
-      document.getElementById('results').style.display = 'none';
+      showLoader();
 
-      document.getElementById('errorBox').style.display = 'none';
+      // Abort any previous request
+      if (_abortController) _abortController.abort();
+      _abortController = new AbortController();
 
-      document.getElementById('loader').style.display = 'flex';
+      // Hard frontend timeout: 20 s
+      const frontendTimeout = setTimeout(() => {
+        if (_abortController) _abortController.abort();
+      }, 20000);
 
       try {
-
-        const controller = new AbortController();
-
-        const timeout = setTimeout(() => {
-          controller.abort();
-        }, 15000);
-
         const res = await fetch('/analyze', {
-
-          method: 'POST',
-
-          headers: {
-            'Content-Type': 'application/json'
-          },
-
-          body: JSON.stringify({
-            symbol
-          }),
-
-          signal: controller.signal
-
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ symbol }),
+          signal:  _abortController.signal,
         });
 
-        clearTimeout(timeout);
+        clearTimeout(frontendTimeout);
+        hideLoader();
 
-        const data = await res.json();
-
-        document.getElementById('loader').style.display = 'none';
+        let data;
+        try {
+          data = await res.json();
+        } catch (_) {
+          showError('Invalid response from server. Please try again.');
+          return;
+        }
 
         if (!res.ok || data.error) {
-
-          showError(data.error || 'Unknown error');
-
+          showError(data.error || `Server error (${res.status}).`);
           return;
-
         }
 
         renderResults(data);
 
       } catch (err) {
-
-        document.getElementById('loader').style.display = 'none';
+        clearTimeout(frontendTimeout);
+        hideLoader();
 
         if (err.name === 'AbortError') {
-
-          showError(
-            'Server timeout. Render free tier may be waking up.'
-          );
-
+          showError('Request timed out (20 s). Render free tier may be starting up — please try again.');
         } else {
-
-          showError(
-            'Network error: ' + err.message
-          );
-
+          showError('Network error: ' + err.message);
         }
-
+      } finally {
+        _analysisRunning = false;
+        document.getElementById('analyzeBtn').disabled = false;
       }
-
     }
 
-    // RENDER
-
+    /* ── Render results ─────────────────────────────────────────────────── */
     function renderResults(d) {
-
       document.getElementById('results').style.display = 'block';
 
-      document.getElementById('sh_ticker').textContent =
-        d.symbol;
+      document.getElementById('sh_ticker').textContent = d.symbol || '';
+      document.getElementById('sh_name').textContent   = d.company_name || '';
+      document.getElementById('sh_price').textContent  = '₹' + fmt(d.current_price);
 
-      document.getElementById('sh_name').textContent =
-        d.company_name;
+      const changeEl = document.getElementById('sh_change');
+      const dc       = Number(d.day_change) || 0;
+      changeEl.textContent = (dc >= 0 ? '+' : '') + dc.toFixed(2) + '%';
+      changeEl.className   = 'sh-change ' + (dc >= 0 ? 'pos' : 'neg');
 
-      document.getElementById('sh_price').textContent =
-        '₹' + fmt(d.current_price);
+      // Colour recommendation card
+      const recEl = document.getElementById('mc_rec');
+      recEl.textContent  = d.recommendation || '';
+      recEl.className    = 'mc-value rec-' + (d.recommendation || '').toLowerCase();
 
-      const changeEl =
-        document.getElementById('sh_change');
+      document.getElementById('mc_quant').textContent    = (Number(d.quant_score) || 0).toFixed(0) + ' / 90';
+      document.getElementById('mc_conf').textContent     = (Number(d.confidence)  || 0).toFixed(1) + '%';
+      document.getElementById('mc_trend').textContent    = d.trend            || '';
+      document.getElementById('mc_momentum').textContent = d.momentum_signal   || '';
+      document.getElementById('mc_rsi').textContent      = (Number(d.rsi) || 0).toFixed(1) + ' — ' + (d.rsi_signal || '');
+      document.getElementById('mc_vol').textContent      = (Number(d.volatility) || 0).toFixed(1) + '%  ' + (d.vol_label || '');
+      document.getElementById('mc_volume').textContent   = d.vol_signal || '';
 
-      changeEl.textContent =
-        (d.day_change >= 0 ? '+' : '') +
-        d.day_change.toFixed(2) + '%';
+      document.getElementById('pred_current').textContent = '₹' + fmt(d.current_price);
 
-      changeEl.className =
-        'sh-change ' +
-        (d.day_change >= 0 ? 'pos' : 'neg');
-
-      document.getElementById('mc_rec').textContent =
-        d.recommendation;
-
-      document.getElementById('mc_quant').textContent =
-        d.quant_score.toFixed(0);
-
-      document.getElementById('mc_conf').textContent =
-        d.confidence.toFixed(1) + '%';
-
-      document.getElementById('mc_trend').textContent =
-        d.trend;
-
-      document.getElementById('mc_momentum').textContent =
-        d.momentum_signal;
-
-      document.getElementById('mc_rsi').textContent =
-        d.rsi.toFixed(1);
-
-      document.getElementById('mc_vol').textContent =
-        d.volatility.toFixed(1) + '%';
-
-      document.getElementById('mc_volume').textContent =
-        d.vol_signal;
-
-      document.getElementById('pred_current').textContent =
-        '₹' + fmt(d.current_price);
-
-      document.getElementById('pred_future').textContent =
-        '₹' + fmt(d.predicted_price);
+      const pf    = document.getElementById('pred_future');
+      const chgPct = Number(d.price_change_pct) || 0;
+      pf.textContent = '₹' + fmt(d.predicted_price) + '  (' + (chgPct >= 0 ? '+' : '') + chgPct.toFixed(2) + '%)';
+      pf.className   = 'pred-value ' + (chgPct >= 0 ? 'pred-green' : 'pred-red');
 
       document.getElementById('pred_range').textContent =
-        'Expected range: ₹' +
-        fmt(d.pred_low) +
-        ' – ₹' +
-        fmt(d.pred_high);
+        'Expected range: ₹' + fmt(d.pred_low) + ' – ₹' + fmt(d.pred_high);
 
-      // EXPLANATIONS
-
-      const explainList =
-        document.getElementById('explainList');
-
-      explainList.innerHTML =
-        d.explanations.map((e, i) => `
-          <div class="explain-item">
-            <span class="explain-num">
-              ${String(i + 1).padStart(2, '0')}
-            </span>
-            <span class="explain-text">
-              ${e}
-            </span>
-          </div>
-        `).join('');
-
-      // CHART
+      // Explanations
+      const explainList = document.getElementById('explainList');
+      explainList.innerHTML = (d.explanations || []).map((e, i) => `
+        <div class="explain-item" style="animation-delay:${i * 0.1}s">
+          <span class="explain-num">${String(i + 1).padStart(2, '0')}</span>
+          <span class="explain-text">${e}</span>
+        </div>
+      `).join('');
 
       renderChart(d);
 
-      document.getElementById('results')
-        .scrollIntoView({
-          behavior: 'smooth'
-        });
-
+      document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
     }
 
-    // CHART RENDER
-
+    /* ── Chart ──────────────────────────────────────────────────────────── */
     function renderChart(d) {
-
-      if (!d.chart_closes ||
-          !d.chart_closes.length) {
-        return;
-      }
+      // Guard: need at least 2 data points
+      const closes = d.chart_closes;
+      const dates  = d.chart_dates;
+      if (!closes || !dates || closes.length < 2) return;
 
       if (chartInstance) {
         chartInstance.destroy();
+        chartInstance = null;
       }
 
-      const ctx =
-        document.getElementById('priceChart')
-          .getContext('2d');
+      const canvas = document.getElementById('priceChart');
+      if (!canvas) return;
 
-      chartInstance = new Chart(ctx, {
+      const ctx = canvas.getContext('2d');
 
-        type: 'line',
+      // Gradient fill
+      const grad = ctx.createLinearGradient(0, 0, 0, 400);
+      grad.addColorStop(0, 'rgba(0,212,255,0.25)');
+      grad.addColorStop(1, 'rgba(0,212,255,0.00)');
 
-        data: {
-
-          labels: d.chart_dates,
-
-          datasets: [{
-
-            label: 'Close',
-
-            data: d.chart_closes,
-
-            borderColor: '#00d4ff',
-
-            backgroundColor:
-              'rgba(0,212,255,0.12)',
-
-            fill: true,
-
-            tension: 0.3,
-
-            pointRadius: 0,
-
-            borderWidth: 2
-
-          }]
-
-        },
-
-        options: {
-
-          responsive: true,
-
-          maintainAspectRatio: false,
-
-          plugins: {
-            legend: {
-              display: false
-            }
+      try {
+        chartInstance = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: dates,
+            datasets: [{
+              label:           'Close',
+              data:            closes,
+              borderColor:     '#00d4ff',
+              backgroundColor: grad,
+              fill:            true,
+              tension:         0.35,
+              pointRadius:     2,
+              pointHoverRadius:6,
+              pointBackgroundColor: '#00d4ff',
+              borderWidth:     2,
+            }],
           },
-
-          scales: {
-
-            x: {
-
-              ticks: {
-                color: '#64748b'
+          options: {
+            responsive:          true,
+            maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                backgroundColor: '#0f172a',
+                borderColor:     'rgba(0,212,255,0.3)',
+                borderWidth:     1,
+                titleColor:      '#94a3b8',
+                bodyColor:       '#f3f4f6',
+                callbacks: {
+                  label: ctx => ' ₹' + Number(ctx.parsed.y).toLocaleString('en-IN', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  }),
+                },
               },
-
-              grid: {
-                color: 'rgba(255,255,255,0.04)'
-              }
-
             },
-
-            y: {
-
-              ticks: {
-                color: '#64748b'
+            scales: {
+              x: {
+                ticks: { color: '#64748b', maxTicksLimit: 10 },
+                grid:  { color: 'rgba(255,255,255,0.04)' },
               },
-
-              grid: {
-                color: 'rgba(255,255,255,0.04)'
-              }
-
-            }
-
-          }
-
-        }
-
-      });
-
+              y: {
+                ticks: {
+                  color:   '#64748b',
+                  callback: v => '₹' + Number(v).toLocaleString('en-IN'),
+                },
+                grid: { color: 'rgba(255,255,255,0.04)' },
+              },
+            },
+          },
+        });
+      } catch (chartErr) {
+        console.warn('Chart.js render failed:', chartErr);
+      }
     }
 
-    // HELPERS
-
+    /* ── Helpers ────────────────────────────────────────────────────────── */
     function fmt(n) {
-
-      return Number(n).toLocaleString(
-        'en-IN',
-        {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2
-        }
-      );
-
+      return Number(n).toLocaleString('en-IN', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      });
     }
 
     function showError(msg) {
-
-      document.getElementById('errorMsg')
-        .textContent = msg;
-
-      document.getElementById('errorBox')
-        .style.display = 'flex';
-
+      document.getElementById('errorMsg').textContent = msg;
+      document.getElementById('errorBox').style.display = 'flex';
     }
 
     function dismissError() {
-
-      document.getElementById('errorBox')
-        .style.display = 'none';
-
+      document.getElementById('errorBox').style.display = 'none';
     }
-
   </script>
 
 </body>
