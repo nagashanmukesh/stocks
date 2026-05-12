@@ -1,283 +1,791 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <title>NSEPredict Quant</title>
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
-  <link rel="stylesheet" href="/style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NSE Quant Terminal — Statistical Analysis Engine</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@300;400;500;600&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
-
 <body>
 
-<div class="background-glow glow-1"></div>
-<div class="background-glow glow-2"></div>
+  <!-- ─── BACKGROUND GRID ────────────────────────────────────── -->
+  <div class="bg-grid"></div>
+  <div class="bg-glow"></div>
 
-<header class="navbar">
+  <!-- ─── NAVBAR ───────────────────────────────────────────────── -->
+  <nav class="navbar">
+    <div class="nav-left">
+      <span class="nav-logo">
+        <span class="logo-bracket">[</span>QT<span class="logo-bracket">]</span>
+      </span>
+      <span class="nav-title">NSE Quant Terminal</span>
+    </div>
+    <div class="nav-right">
+      <span class="nav-badge">v2.4 LIVE</span>
+      <span class="nav-time" id="liveTime"></span>
+    </div>
+  </nav>
 
-  <div class="logo-box">
-
-    <div class="logo-icon">
-      ₹
+  <!-- ─── HERO / SEARCH ─────────────────────────────────────────── -->
+  <section class="hero">
+    <div class="hero-tagline">
+      <span class="tag-line-accent">Statistical Edge</span>
+      <h1 class="hero-heading">NSE Alpha Engine</h1>
+      <p class="hero-sub">Exponentially-weighted regression · RSI · Momentum · Volatility · Quant Score</p>
     </div>
 
-    <div>
-      <h2>NSEPredict Quant</h2>
-      <p>Quantitative NSE Analytics</p>
-    </div>
-
-  </div>
-
-  <div class="nav-badge">
-    NSE • Quant Engine
-  </div>
-
-</header>
-
-<main class="container">
-
-  <section class="hero-section">
-
-    <h1>
-      Quantitative <span>Stock Analysis</span>
-    </h1>
-
-    <p>
-      Analyze Indian NSE stocks using quantitative trend, momentum, RSI, volatility and statistical signal analysis.
-    </p>
-
-  </section>
-
-  <section class="glass-card search-card">
-
-    <div class="section-top">
-      <h3>Search NSE Stock</h3>
-      <span>Live Yahoo Finance Data</span>
-    </div>
-
-    <form method="POST" action="/" id="stockForm">
-
-      <div class="input-group">
-
+    <div class="search-wrapper">
+      <div class="search-box">
+        <span class="search-icon">⬡</span>
         <input
           type="text"
-          name="symbol"
-          placeholder="TCS / RELIANCE / INFY"
-          required
-        >
-
-        <button type="submit" id="submitBtn">
-
-          <span class="btn-text">
-            Analyze
-          </span>
-
-          <span class="btn-loader">
-            Loading...
-          </span>
-
+          id="stockInput"
+          class="search-input"
+          placeholder="Enter NSE ticker — e.g. RELIANCE, TCS, INFY..."
+          autocomplete="off"
+          spellcheck="false"
+        />
+        <button class="search-btn" id="analyzeBtn" onclick="analyzeStock()">
+          <span class="btn-label">ANALYZE</span>
+          <span class="btn-arrow">→</span>
         </button>
-
       </div>
+      <div class="suggestions" id="suggestions"></div>
+    </div>
 
-      <div class="chips-row">
-
-        <button type="button" onclick="setTicker('TCS')">TCS</button>
-        <button type="button" onclick="setTicker('RELIANCE')">RELIANCE</button>
-        <button type="button" onclick="setTicker('INFY')">INFY</button>
-        <button type="button" onclick="setTicker('HDFCBANK')">HDFCBANK</button>
-        <button type="button" onclick="setTicker('WIPRO')">WIPRO</button>
-
-      </div>
-
-    </form>
-
+    <!-- Quick picks -->
+    <div class="quick-picks">
+      <span class="qp-label">QUICK PICKS :</span>
+      <button class="qp-chip" onclick="quickAnalyze('RELIANCE')">RELIANCE</button>
+      <button class="qp-chip" onclick="quickAnalyze('TCS')">TCS</button>
+      <button class="qp-chip" onclick="quickAnalyze('INFY')">INFY</button>
+      <button class="qp-chip" onclick="quickAnalyze('HDFCBANK')">HDFCBANK</button>
+      <button class="qp-chip" onclick="quickAnalyze('SBIN')">SBIN</button>
+      <button class="qp-chip" onclick="quickAnalyze('WIPRO')">WIPRO</button>
+    </div>
   </section>
 
-  {% if error %}
-
-  <section class="glass-card error-card">
-    ⚠ {{ error }}
-  </section>
-
-  {% endif %}
-
-  {% if result %}
-
-  <section class="results-grid">
-
-    <div class="glass-card stock-card full-width">
-
-      <div>
-        <p class="label">Stock Symbol</p>
-        <h2>{{ result.symbol }}</h2>
+  <!-- ─── LOADING STATE ─────────────────────────────────────────── -->
+  <div class="loader-wrapper" id="loader" style="display:none">
+    <div class="loader-box">
+      <div class="loader-ring"></div>
+      <div class="loader-lines">
+        <span class="lline" id="ll1">Fetching live market data...</span>
+        <span class="lline" id="ll2">Running regression model...</span>
+        <span class="lline" id="ll3">Computing quant signals...</span>
+        <span class="lline" id="ll4">Generating alpha report...</span>
       </div>
-
-      <div class="status-dot"></div>
-
     </div>
+  </div>
 
-    <div class="glass-card metric-card">
-
-      <p class="label">Current Price</p>
-
-      <h2>₹{{ result.current_price }}</h2>
-
-      <span>Latest Market Price</span>
-
+  <!-- ─── ERROR STATE ───────────────────────────────────────────── -->
+  <div class="error-wrapper" id="errorBox" style="display:none">
+    <div class="error-card">
+      <span class="error-icon">✕</span>
+      <p class="error-msg" id="errorMsg"></p>
+      <button class="error-dismiss" onclick="dismissError()">DISMISS</button>
     </div>
+  </div>
 
-    <div class="glass-card metric-card">
+  <!-- ─── RESULTS PANEL ─────────────────────────────────────────── -->
+  <main class="results" id="results" style="display:none">
 
-      <p class="label">Predicted Price</p>
-
-      <h2>₹{{ result.predicted_price }}</h2>
-
-      <span>
-
-        {% if result.change_pct > 0 %}
-          ▲ +{{ result.change_pct }}%
-        {% else %}
-          ▼ {{ result.change_pct }}%
-        {% endif %}
-
-      </span>
-
-    </div>
-
-    <div class="glass-card signal-card {{ result.signal_class }} full-width">
-
-      <div class="signal-left">
-
-        <div class="signal-icon">
-          {{ result.signal_icon }}
+    <!-- ── STOCK HEADER ─── -->
+    <div class="stock-header">
+      <div class="sh-left">
+        <div class="sh-ticker" id="sh_ticker"></div>
+        <div class="sh-name"   id="sh_name"></div>
+        <div class="sh-meta">
+          <span class="sh-meta-item" id="sh_sector"></span>
+          <span class="sh-divider">·</span>
+          <span class="sh-meta-item" id="sh_mcap"></span>
         </div>
+      </div>
+      <div class="sh-right">
+        <div class="sh-price" id="sh_price"></div>
+        <div class="sh-change" id="sh_change"></div>
+      </div>
+    </div>
 
-        <div>
+    <!-- ── TOP COMMAND ROW ─── -->
+    <div class="command-row">
 
-          <p class="label">Recommendation</p>
-
-          <h1>{{ result.signal }}</h1>
-
+      <!-- Quant Score Gauge -->
+      <div class="card gauge-card">
+        <div class="card-label">QUANT SCORE</div>
+        <div class="gauge-wrap">
+          <svg class="gauge-svg" viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%"   stop-color="#ff4757"/>
+                <stop offset="40%"  stop-color="#ffd700"/>
+                <stop offset="100%" stop-color="#00ff88"/>
+              </linearGradient>
+            </defs>
+            <!-- Background arc -->
+            <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="16" stroke-linecap="round"/>
+            <!-- Colored arc -->
+            <path id="gaugeArc" d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="url(#gaugeGrad)" stroke-width="16" stroke-linecap="round"
+              stroke-dasharray="0 251.2" style="transition: stroke-dasharray 1.2s cubic-bezier(.4,0,.2,1)"/>
+            <!-- Needle -->
+            <line id="gaugeNeedle" x1="100" y1="100" x2="100" y2="28"
+              stroke="rgba(255,255,255,0.9)" stroke-width="2.5" stroke-linecap="round"
+              style="transform-origin:100px 100px; transform:rotate(-90deg); transition:transform 1.2s cubic-bezier(.4,0,.2,1)"/>
+            <circle cx="100" cy="100" r="5" fill="white" opacity="0.9"/>
+            <!-- Score text -->
+            <text id="gaugeText" x="100" y="78" text-anchor="middle" fill="white" font-size="28" font-weight="700" font-family="IBM Plex Mono">0</text>
+            <text x="100" y="92" text-anchor="middle" fill="rgba(255,255,255,0.4)" font-size="9" font-family="Syne">OUT OF 100</text>
+          </svg>
         </div>
-
+        <div class="gauge-sentiment" id="gauge_sentiment"></div>
       </div>
 
-      <div class="signal-right">
+      <!-- Recommendation -->
+      <div class="card rec-card" id="recCard">
+        <div class="card-label">RECOMMENDATION</div>
+        <div class="rec-signal" id="rec_signal"></div>
+        <div class="rec-reason" id="rec_reason"></div>
+        <div class="rec-divider"></div>
+        <div class="rec-meta-grid">
+          <div class="rec-meta-item">
+            <span class="rmi-label">PREDICTED</span>
+            <span class="rmi-value" id="rec_predicted"></span>
+          </div>
+          <div class="rec-meta-item">
+            <span class="rmi-label">CHANGE</span>
+            <span class="rmi-value" id="rec_change"></span>
+          </div>
+          <div class="rec-meta-item">
+            <span class="rmi-label">CONFIDENCE</span>
+            <span class="rmi-value" id="rec_confidence"></span>
+          </div>
+          <div class="rec-meta-item">
+            <span class="rmi-label">RANGE</span>
+            <span class="rmi-value rmi-small" id="rec_range"></span>
+          </div>
+        </div>
+      </div>
 
-        {{ result.explanation }}
-
+      <!-- Prediction Box -->
+      <div class="card pred-card">
+        <div class="card-label">NEXT-DAY PROJECTION</div>
+        <div class="pred-current">
+          <span class="pred-label-s">CURRENT</span>
+          <span class="pred-val" id="pred_current"></span>
+        </div>
+        <div class="pred-arrow-row">
+          <div class="pred-arrow-line"></div>
+          <span class="pred-arrow-icon" id="pred_arrow_icon">↗</span>
+        </div>
+        <div class="pred-future">
+          <span class="pred-label-s">PROJECTED</span>
+          <span class="pred-val pred-val-large" id="pred_future"></span>
+        </div>
+        <div class="pred-band">
+          <div class="pred-band-bar">
+            <div class="pred-band-fill" id="pred_band_fill"></div>
+            <div class="pred-band-marker" id="pred_band_marker"></div>
+          </div>
+          <div class="pred-band-labels">
+            <span id="pred_low_lbl"></span>
+            <span>RANGE</span>
+            <span id="pred_high_lbl"></span>
+          </div>
+        </div>
       </div>
 
     </div>
 
-  </section>
+    <!-- ── 6-METRIC ANALYSIS GRID ─── -->
+    <div class="metrics-grid">
 
-  <section class="results-grid">
+      <!-- Trend -->
+      <div class="metric-card">
+        <div class="mc-header">
+          <span class="mc-icon">◈</span>
+          <span class="mc-title">TREND</span>
+        </div>
+        <div class="mc-value" id="mc_trend"></div>
+        <div class="mc-sub">
+          MA20 <span id="mc_ma20"></span> · MA50 <span id="mc_ma50"></span>
+        </div>
+        <div class="mc-bar-wrap">
+          <div class="mc-bar" id="mc_trend_bar"></div>
+        </div>
+      </div>
 
-    <div class="glass-card metric-card">
-      <p class="label">Trend</p>
-      <h2>{{ result.trend }}</h2>
+      <!-- Momentum -->
+      <div class="metric-card">
+        <div class="mc-header">
+          <span class="mc-icon">⟴</span>
+          <span class="mc-title">MOMENTUM</span>
+        </div>
+        <div class="mc-value" id="mc_momentum"></div>
+        <div class="mc-sub">
+          5D <span id="mc_mom5"></span> · 20D <span id="mc_mom20"></span>
+        </div>
+        <div class="mc-bar-wrap">
+          <div class="mc-bar" id="mc_mom_bar"></div>
+        </div>
+      </div>
+
+      <!-- RSI -->
+      <div class="metric-card">
+        <div class="mc-header">
+          <span class="mc-icon">◎</span>
+          <span class="mc-title">RSI — 14</span>
+        </div>
+        <div class="mc-value" id="mc_rsi"></div>
+        <div class="mc-rsi-track">
+          <div class="mc-rsi-zones">
+            <span>0</span><span>30</span><span>50</span><span>70</span><span>100</span>
+          </div>
+          <div class="mc-rsi-bar-bg">
+            <div class="mc-rsi-bar-fill" id="mc_rsi_fill"></div>
+            <div class="mc-rsi-needle" id="mc_rsi_needle"></div>
+          </div>
+          <div class="mc-sub" style="margin-top:6px" id="mc_rsi_signal"></div>
+        </div>
+      </div>
+
+      <!-- Volatility -->
+      <div class="metric-card">
+        <div class="mc-header">
+          <span class="mc-icon">≋</span>
+          <span class="mc-title">VOLATILITY</span>
+        </div>
+        <div class="mc-value" id="mc_vol"></div>
+        <div class="mc-sub" id="mc_vol_label"></div>
+        <div class="mc-bar-wrap">
+          <div class="mc-bar mc-bar-danger" id="mc_vol_bar"></div>
+        </div>
+      </div>
+
+      <!-- Volume -->
+      <div class="metric-card">
+        <div class="mc-header">
+          <span class="mc-icon">▦</span>
+          <span class="mc-title">VOLUME</span>
+        </div>
+        <div class="mc-value" id="mc_vol_signal"></div>
+        <div class="mc-sub">
+          Ratio <span id="mc_vol_ratio"></span>x vs 20D avg
+        </div>
+        <div class="mc-bar-wrap">
+          <div class="mc-bar mc-bar-neutral" id="mc_vol_act_bar"></div>
+        </div>
+      </div>
+
+      <!-- Confidence -->
+      <div class="metric-card">
+        <div class="mc-header">
+          <span class="mc-icon">⊕</span>
+          <span class="mc-title">MODEL CONFIDENCE</span>
+        </div>
+        <div class="mc-value" id="mc_confidence"></div>
+        <div class="mc-sub">R² regression fit</div>
+        <div class="mc-bar-wrap">
+          <div class="mc-bar mc-bar-primary" id="mc_conf_bar"></div>
+        </div>
+      </div>
+
     </div>
 
-    <div class="glass-card metric-card">
-      <p class="label">Momentum</p>
-      <h2>{{ result.momentum }}</h2>
+    <!-- ── CHART ─── -->
+    <div class="card chart-card">
+      <div class="chart-header">
+        <div class="chart-title">30-DAY PRICE CHART</div>
+        <div class="chart-legend">
+          <span class="cl-dot cl-price"></span><span>Close</span>
+          <span class="cl-dot cl-ma20" style="margin-left:16px"></span><span>MA20</span>
+          <span class="cl-dot cl-volume" style="margin-left:16px"></span><span>Volume</span>
+        </div>
+      </div>
+      <div class="chart-container">
+        <canvas id="priceChart"></canvas>
+      </div>
     </div>
 
-    <div class="glass-card metric-card">
-      <p class="label">Risk</p>
-      <h2>{{ result.risk }}</h2>
+    <!-- ── 52-WEEK RANGE ─── -->
+    <div class="card range-card">
+      <div class="card-label">52-WEEK RANGE</div>
+      <div class="range-bar-wrap">
+        <span class="range-low"  id="r52_low"></span>
+        <div class="range-track">
+          <div class="range-fill" id="r52_fill"></div>
+          <div class="range-dot"  id="r52_dot"></div>
+        </div>
+        <span class="range-high" id="r52_high"></span>
+      </div>
+      <div class="range-pos-label">
+        Current price is in the <strong id="r52_pos_pct"></strong> percentile of its 52-week range
+      </div>
     </div>
 
-    <div class="glass-card metric-card">
-      <p class="label">Confidence</p>
-      <h2>{{ result.confidence }}%</h2>
+    <!-- ── AI EXPLANATION ─── -->
+    <div class="card explain-card">
+      <div class="explain-header">
+        <span class="explain-icon">⊞</span>
+        <span class="explain-title">QUANT SIGNAL BREAKDOWN</span>
+        <span class="explain-badge">STATISTICAL ENGINE</span>
+      </div>
+      <div class="explain-list" id="explainList"></div>
     </div>
 
-    <div class="glass-card metric-card">
-      <p class="label">RSI</p>
-      <h2>{{ result.rsi }}</h2>
+    <!-- ── FOOTER NOTE ─── -->
+    <div class="disclaimer">
+      <span class="disc-icon">⚠</span>
+      Statistical model for educational purposes only. Not financial advice.
+      Past patterns do not guarantee future results. Always perform independent due diligence.
     </div>
 
-    <div class="glass-card metric-card">
-      <p class="label">Sentiment</p>
-      <h2>{{ result.sentiment }}</h2>
-    </div>
+  </main>
 
-    <div class="glass-card metric-card">
-      <p class="label">Volume</p>
-      <h2>{{ result.volume_signal }}</h2>
-    </div>
+  <!-- ─── SCRIPTS ───────────────────────────────────────────────── -->
+  <script>
+    // ── Live clock ──────────────────────────────────────────────
+    function updateClock() {
+      const now = new Date();
+      const ist = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
+      document.getElementById('liveTime').textContent =
+        ist.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' IST';
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
 
-    <div class="glass-card metric-card">
-      <p class="label">Prediction Range</p>
-      <h2>
-        ₹{{ result.prediction_lower }}
-        -
-        ₹{{ result.prediction_upper }}
-      </h2>
-    </div>
+    // ── Search suggestions ──────────────────────────────────────
+    let suggestionsData = [];
+    fetch('/search').then(r => r.json()).then(d => { suggestionsData = d; });
 
-    <div class="glass-card metric-card full-width">
-      <p class="label">Quant Score</p>
-      <h2>{{ result.score }}/100</h2>
-    </div>
+    const stockInput = document.getElementById('stockInput');
+    const suggestBox = document.getElementById('suggestions');
 
-  </section>
+    stockInput.addEventListener('input', () => {
+      const q = stockInput.value.trim().toUpperCase();
+      if (!q) { suggestBox.innerHTML = ''; suggestBox.style.display = 'none'; return; }
+      const matches = suggestionsData.filter(s =>
+        s.symbol.startsWith(q) || s.name.toUpperCase().includes(q)
+      ).slice(0, 6);
+      if (!matches.length) { suggestBox.style.display = 'none'; return; }
+      suggestBox.innerHTML = matches.map(m =>
+        `<div class="sug-item" onclick="selectSuggestion('${m.symbol}')">
+          <span class="sug-sym">${m.symbol}</span>
+          <span class="sug-name">${m.name}</span>
+        </div>`
+      ).join('');
+      suggestBox.style.display = 'block';
+    });
 
-  <section class="glass-card info-card">
+    stockInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter') analyzeStock();
+    });
 
-    <h3>AI Quant Explanation</h3>
+    document.addEventListener('click', e => {
+      if (!e.target.closest('.search-wrapper')) {
+        suggestBox.style.display = 'none';
+      }
+    });
 
-    <p class="explanation-text">
-      {{ result.explanation }}
-    </p>
+    function selectSuggestion(sym) {
+      stockInput.value = sym;
+      suggestBox.style.display = 'none';
+      analyzeStock();
+    }
 
-  </section>
+    function quickAnalyze(sym) {
+      stockInput.value = sym;
+      analyzeStock();
+    }
 
-  {% endif %}
+    // ── Loader animation ─────────────────────────────────────────
+    let loaderTimer = null;
+    function startLoader() {
+      const lines = ['ll1','ll2','ll3','ll4'];
+      lines.forEach(id => document.getElementById(id).classList.remove('lline-active'));
+      let i = 0;
+      loaderTimer = setInterval(() => {
+        if (i < lines.length) {
+          document.getElementById(lines[i]).classList.add('lline-active');
+          i++;
+        }
+      }, 600);
+    }
+    function stopLoader() { clearInterval(loaderTimer); }
 
-</main>
+    // ── Chart instance ───────────────────────────────────────────
+    let chartInstance = null;
 
-<footer class="footer">
+    // ── Main analyze function ─────────────────────────────────────
+    async function analyzeStock() {
+      const symbol = stockInput.value.trim();
+      if (!symbol) { showError('Please enter a stock ticker symbol.'); return; }
 
-  <p>
-    ⚠ Educational purpose only. Not financial advice.
-  </p>
+      // UI state
+      document.getElementById('results').style.display = 'none';
+      document.getElementById('errorBox').style.display = 'none';
+      document.getElementById('loader').style.display = 'flex';
+      suggestBox.style.display = 'none';
+      startLoader();
 
-  <span>
-    Built with Flask + NumPy + yfinance
-  </span>
+      try {
+        const res  = await fetch('/analyze', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ symbol }),
+        });
+        const data = await res.json();
 
-</footer>
+        stopLoader();
+        document.getElementById('loader').style.display = 'none';
 
-<script>
+        if (!res.ok || data.error) {
+          showError(data.error || 'Unknown error occurred.');
+          return;
+        }
 
-function setTicker(stock) {
-  document.querySelector('input[name="symbol"]').value = stock;
-}
+        renderResults(data);
 
-const form = document.getElementById('stockForm');
+      } catch (err) {
+        stopLoader();
+        document.getElementById('loader').style.display = 'none';
+        showError('Network error: ' + err.message);
+      }
+    }
 
-form.addEventListener('submit', function () {
+    // ── Render all results ────────────────────────────────────────
+    function renderResults(d) {
+      // Stock header
+      document.getElementById('sh_ticker').textContent = d.symbol;
+      document.getElementById('sh_name').textContent   = d.company_name;
+      document.getElementById('sh_sector').textContent = d.sector;
+      document.getElementById('sh_mcap').textContent   = d.market_cap;
+      document.getElementById('sh_price').textContent  = '₹' + fmt(d.current_price);
 
-  document.querySelector('.btn-text').style.display = 'none';
+      const chEl = document.getElementById('sh_change');
+      chEl.textContent = (d.day_change >= 0 ? '▲ +' : '▼ ') + d.day_change.toFixed(2) + '%';
+      chEl.className   = 'sh-change ' + (d.day_change >= 0 ? 'pos' : 'neg');
 
-  document.querySelector('.btn-loader').style.display = 'inline';
+      // Quant gauge
+      animateGauge(d.quant_score);
+      document.getElementById('gauge_sentiment').textContent  = d.sentiment;
+      document.getElementById('gauge_sentiment').className    =
+        'gauge-sentiment snt-' + sentimentClass(d.sentiment);
 
-  document.getElementById('submitBtn').disabled = true;
+      // Recommendation
+      const recCard = document.getElementById('recCard');
+      const recSig  = document.getElementById('rec_signal');
+      recSig.textContent  = d.recommendation;
+      recSig.className    = 'rec-signal rec-' + d.recommendation.toLowerCase();
+      recCard.className   = 'card rec-card rec-border-' + d.recommendation.toLowerCase();
 
-});
+      document.getElementById('rec_reason').textContent =
+        d.recommendation === 'BUY'  ? 'Strong quant signals + positive projection' :
+        d.recommendation === 'SELL' ? 'Weak signals or negative projection' :
+        'Mixed signals — monitor closely';
 
-</script>
+      document.getElementById('rec_predicted').textContent  = '₹' + fmt(d.predicted_price);
+      const pcEl = document.getElementById('rec_change');
+      pcEl.textContent = (d.price_change_pct >= 0 ? '+' : '') + d.price_change_pct.toFixed(2) + '%';
+      pcEl.className   = 'rmi-value ' + (d.price_change_pct >= 0 ? 'pos' : 'neg');
+      document.getElementById('rec_confidence').textContent = d.confidence.toFixed(1) + '%';
+      document.getElementById('rec_range').textContent      = '₹' + fmt(d.pred_low) + ' – ₹' + fmt(d.pred_high);
+
+      // Prediction box
+      document.getElementById('pred_current').textContent = '₹' + fmt(d.current_price);
+      document.getElementById('pred_future').textContent  = '₹' + fmt(d.predicted_price);
+      const arrowEl = document.getElementById('pred_arrow_icon');
+      arrowEl.textContent = d.predicted_price >= d.current_price ? '↗' : '↘';
+      arrowEl.className   = 'pred-arrow-icon ' + (d.predicted_price >= d.current_price ? 'pos' : 'neg');
+
+      document.getElementById('pred_low_lbl').textContent  = '₹' + fmt(d.pred_low);
+      document.getElementById('pred_high_lbl').textContent = '₹' + fmt(d.pred_high);
+
+      // Band position of predicted price within range
+      const bandRange = d.pred_high - d.pred_low;
+      const bandPos   = bandRange > 0 ? ((d.predicted_price - d.pred_low) / bandRange * 100) : 50;
+      document.getElementById('pred_band_marker').style.left = Math.min(95, Math.max(5, bandPos)) + '%';
+
+      // Metrics
+      setMetric('mc_trend', d.trend, trendColor(d.trend));
+      document.getElementById('mc_ma20').textContent = '₹' + fmt(d.ma20);
+      document.getElementById('mc_ma50').textContent = '₹' + fmt(d.ma50);
+      animBar('mc_trend_bar', trendPct(d.trend), trendColor(d.trend));
+
+      setMetric('mc_momentum', d.momentum_signal, momentumColor(d.momentum_signal));
+      document.getElementById('mc_mom5').textContent  = (d.momentum_5  >= 0 ? '+' : '') + d.momentum_5.toFixed(2)  + '%';
+      document.getElementById('mc_mom20').textContent = (d.momentum_20 >= 0 ? '+' : '') + d.momentum_20.toFixed(2) + '%';
+      animBar('mc_mom_bar', momentumPct(d.momentum_signal), momentumColor(d.momentum_signal));
+
+      setMetric('mc_rsi', d.rsi.toFixed(1), rsiColor(d.rsi));
+      document.getElementById('mc_rsi_signal').textContent = d.rsi_signal;
+      animRsiNeedle(d.rsi);
+
+      setMetric('mc_vol', d.volatility.toFixed(1) + '%', volColor(d.volatility));
+      document.getElementById('mc_vol_label').textContent = 'Annualized · ' + d.vol_label + ' RISK';
+      animBar('mc_vol_bar', Math.min(d.volatility / 80 * 100, 100), volColor(d.volatility));
+
+      setMetric('mc_vol_signal', d.vol_signal, '#00d4ff');
+      document.getElementById('mc_vol_ratio').textContent = d.vol_ratio.toFixed(2);
+      animBar('mc_vol_act_bar', Math.min(d.vol_ratio / 2 * 100, 100), '#00d4ff');
+
+      setMetric('mc_confidence', d.confidence.toFixed(1) + '%', '#a78bfa');
+      animBar('mc_conf_bar', d.confidence, '#a78bfa');
+
+      // 52-week range
+      document.getElementById('r52_low').textContent  = '₹' + fmt(d.week_52_low);
+      document.getElementById('r52_high').textContent = '₹' + fmt(d.week_52_high);
+      const pos52 = d.week_52_pos;
+      setTimeout(() => {
+        document.getElementById('r52_fill').style.width = pos52 + '%';
+        document.getElementById('r52_dot').style.left   = Math.min(97, Math.max(3, pos52)) + '%';
+      }, 300);
+      document.getElementById('r52_pos_pct').textContent = pos52.toFixed(1) + 'th';
+
+      // Explanations
+      const explainList = document.getElementById('explainList');
+      explainList.innerHTML = d.explanations.map((e, i) =>
+        `<div class="explain-item" style="animation-delay:${i * 0.12}s">
+          <span class="explain-num">${String(i + 1).padStart(2, '0')}</span>
+          <span class="explain-text">${e}</span>
+        </div>`
+      ).join('');
+
+      // Chart
+      renderChart(d);
+
+      // Show results
+      document.getElementById('results').style.display = 'block';
+      document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // ── Gauge animation ──────────────────────────────────────────
+    function animateGauge(score) {
+      const arc    = document.getElementById('gaugeArc');
+      const needle = document.getElementById('gaugeNeedle');
+      const text   = document.getElementById('gaugeText');
+      // Arc total length ≈ 251.2 (half circle)
+      const pct     = score / 100;
+      const arcLen  = 251.2 * pct;
+      const angle   = -90 + 180 * pct; // -90° (left) to +90° (right)
+
+      setTimeout(() => {
+        arc.style.strokeDasharray    = arcLen + ' 251.2';
+        needle.style.transform       = `rotate(${angle}deg)`;
+        // Animate counter
+        let cur = 0;
+        const step = score / 60;
+        const timer = setInterval(() => {
+          cur = Math.min(cur + step, score);
+          text.textContent = Math.round(cur);
+          if (cur >= score) clearInterval(timer);
+        }, 16);
+      }, 200);
+    }
+
+    // ── RSI needle ───────────────────────────────────────────────
+    function animRsiNeedle(rsi) {
+      const needle = document.getElementById('mc_rsi_needle');
+      const fill   = document.getElementById('mc_rsi_fill');
+      const pct    = rsi;
+      setTimeout(() => {
+        needle.style.left = pct + '%';
+        fill.style.width  = pct + '%';
+        fill.style.background = rsiColor(rsi);
+      }, 300);
+    }
+
+    // ── Animated bar ─────────────────────────────────────────────
+    function animBar(id, pct, color) {
+      const el = document.getElementById(id);
+      setTimeout(() => {
+        el.style.width      = Math.min(pct, 100) + '%';
+        el.style.background = color;
+      }, 300);
+    }
+
+    // ── Chart ─────────────────────────────────────────────────────
+    function renderChart(d) {
+      if (chartInstance) { chartInstance.destroy(); }
+      const ctx = document.getElementById('priceChart').getContext('2d');
+
+      // Build MA20 overlay for last 30 points
+      const closes    = d.chart_closes;
+      const allCloses = closes; // We only have 30 days on chart
+      const ma20Line  = closes.map((_, i, arr) => {
+        const slice = arr.slice(Math.max(0, i - 19), i + 1);
+        return slice.reduce((a, b) => a + b, 0) / slice.length;
+      });
+
+      // Gradient fill
+      const grad = ctx.createLinearGradient(0, 0, 0, 320);
+      grad.addColorStop(0,   'rgba(0, 212, 255, 0.25)');
+      grad.addColorStop(0.7, 'rgba(0, 212, 255, 0.05)');
+      grad.addColorStop(1,   'rgba(0, 212, 255, 0)');
+
+      const volGrad = ctx.createLinearGradient(0, 0, 0, 80);
+      volGrad.addColorStop(0, 'rgba(124, 58, 237, 0.5)');
+      volGrad.addColorStop(1, 'rgba(124, 58, 237, 0.05)');
+
+      chartInstance = new Chart(ctx, {
+        data: {
+          labels: d.chart_dates,
+          datasets: [
+            {
+              type:            'line',
+              label:           'Close Price',
+              data:            closes,
+              borderColor:     '#00d4ff',
+              borderWidth:     2.5,
+              backgroundColor: grad,
+              fill:            true,
+              tension:         0.3,
+              pointRadius:     0,
+              pointHoverRadius:5,
+              pointHoverBackgroundColor: '#00d4ff',
+              yAxisID:         'yPrice',
+              order:           1,
+            },
+            {
+              type:            'line',
+              label:           'MA20',
+              data:            ma20Line,
+              borderColor:     'rgba(255, 215, 0, 0.7)',
+              borderWidth:     1.5,
+              borderDash:      [4, 3],
+              fill:            false,
+              tension:         0.3,
+              pointRadius:     0,
+              yAxisID:         'yPrice',
+              order:           2,
+            },
+            {
+              type:            'bar',
+              label:           'Volume',
+              data:            d.chart_volumes,
+              backgroundColor: volGrad,
+              borderColor:     'rgba(124,58,237,0.6)',
+              borderWidth:     1,
+              yAxisID:         'yVol',
+              order:           3,
+            },
+          ],
+        },
+        options: {
+          responsive:          true,
+          maintainAspectRatio: false,
+          interaction:         { mode: 'index', intersect: false },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: 'rgba(10,14,26,0.95)',
+              borderColor:     'rgba(0,212,255,0.3)',
+              borderWidth:     1,
+              titleColor:      '#8892a4',
+              bodyColor:       '#e8eaf0',
+              padding:         12,
+              callbacks: {
+                label: ctx => {
+                  if (ctx.dataset.label === 'Volume')
+                    return '  Vol: ' + Number(ctx.raw).toLocaleString('en-IN');
+                  return '  ' + ctx.dataset.label + ': ₹' + Number(ctx.raw).toFixed(2);
+                }
+              }
+            },
+          },
+          scales: {
+            x: {
+              grid:   { color: 'rgba(255,255,255,0.04)', drawBorder: false },
+              ticks:  { color: '#5a6478', font: { family: 'IBM Plex Mono', size: 10 },
+                        maxTicksLimit: 8, maxRotation: 0 },
+            },
+            yPrice: {
+              position: 'left',
+              grid:     { color: 'rgba(255,255,255,0.05)', drawBorder: false },
+              ticks:    { color: '#5a6478', font: { family: 'IBM Plex Mono', size: 10 },
+                          callback: v => '₹' + Number(v).toLocaleString('en-IN') },
+            },
+            yVol: {
+              position: 'right',
+              grid:     { display: false },
+              ticks:    { color: '#5a6478', font: { family: 'IBM Plex Mono', size: 9 },
+                          callback: v => v >= 1e7 ? (v/1e7).toFixed(0)+'Cr' : v >= 1e5 ? (v/1e5).toFixed(0)+'L' : v },
+              max:      Math.max(...d.chart_volumes) * 4,
+            },
+          },
+        }
+      });
+    }
+
+    // ── Helpers ──────────────────────────────────────────────────
+    function fmt(n) { return Number(n).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+
+    function setMetric(id, text, color) {
+      const el = document.getElementById(id);
+      el.textContent  = text;
+      el.style.color  = color;
+    }
+
+    function trendColor(t) {
+      if (t.includes('STRONG UP'))  return '#00ff88';
+      if (t.includes('UP'))         return '#4ade80';
+      if (t.includes('STRONG DOWN'))return '#ff4757';
+      if (t.includes('DOWN'))       return '#fb7185';
+      return '#ffd700';
+    }
+    function trendPct(t) {
+      if (t.includes('STRONG UP'))  return 90;
+      if (t.includes('UP'))         return 70;
+      if (t === 'SIDEWAYS')         return 50;
+      if (t.includes('DOWN'))       return 30;
+      return 10;
+    }
+    function momentumColor(m) {
+      if (m.includes('STRONG BULL')) return '#00ff88';
+      if (m.includes('BULL'))        return '#4ade80';
+      if (m.includes('STRONG BEAR')) return '#ff4757';
+      return '#fb7185';
+    }
+    function momentumPct(m) {
+      if (m.includes('STRONG BULL')) return 90;
+      if (m.includes('BULL'))        return 65;
+      if (m.includes('BEAR'))        return 30;
+      return 10;
+    }
+    function rsiColor(r) {
+      if (r < 30) return '#4ade80';
+      if (r > 70) return '#ff4757';
+      if (r > 55) return '#00d4ff';
+      return '#ffd700';
+    }
+    function volColor(v) {
+      if (v < 20) return '#4ade80';
+      if (v < 40) return '#ffd700';
+      if (v < 60) return '#fb7185';
+      return '#ff4757';
+    }
+    function sentimentClass(s) {
+      if (s.includes('STRONGLY BULL')) return 'bull2';
+      if (s.includes('BULL'))          return 'bull1';
+      if (s.includes('STRONGLY BEAR')) return 'bear2';
+      if (s.includes('BEAR'))          return 'bear1';
+      return 'neutral';
+    }
+
+    function showError(msg) {
+      document.getElementById('errorMsg').textContent = msg;
+      document.getElementById('errorBox').style.display = 'flex';
+      document.getElementById('loader').style.display   = 'none';
+    }
+    function dismissError() {
+      document.getElementById('errorBox').style.display = 'none';
+    }
+  </script>
 
 </body>
 </html>
