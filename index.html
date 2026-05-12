@@ -1,25 +1,269 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Test - NSE Quant</title>
-  <link rel="stylesheet" href="/style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NSE Quant Terminal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body>
-  <h1>✅ Basic Test Page</h1>
-  <p>Server is working!</p>
-  <button onclick="testAnalyze()">Test Analyze</button>
+  <div class="bg-grid"></div>
+  <div class="bg-glow"></div>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <div class="nav-left">
+      <span class="nav-logo"><span class="logo-bracket">[</span>QT<span class="logo-bracket">]</span></span>
+      <span class="nav-title">NSE Quant Terminal</span>
+    </div>
+    <div class="nav-right">
+      <span class="nav-badge">LIVE</span>
+      <span class="nav-time" id="liveTime"></span>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-tagline">
+      <span class="tag-line-accent">Statistical Alpha Engine</span>
+      <h1 class="hero-heading">NSE Quant Dashboard</h1>
+      <p class="hero-sub">Regression · Momentum · RSI · Volatility · Quant Signals</p>
+    </div>
+
+    <div class="search-wrapper">
+      <div class="search-box">
+        <span class="search-icon">⬡</span>
+        <input type="text" id="stockInput" class="search-input" 
+               placeholder="Enter NSE ticker (RELIANCE, TCS, INFY...)" 
+               autocomplete="off" spellcheck="false" />
+        <button class="search-btn" id="analyzeBtn" onclick="analyzeStock()">ANALYZE →</button>
+      </div>
+      <div class="suggestions" id="suggestions"></div>
+    </div>
+
+    <div class="quick-picks">
+      <span class="qp-label">QUICK PICKS :</span>
+      <button class="qp-chip" onclick="quickAnalyze('RELIANCE')">RELIANCE</button>
+      <button class="qp-chip" onclick="quickAnalyze('TCS')">TCS</button>
+      <button class="qp-chip" onclick="quickAnalyze('INFY')">INFY</button>
+      <button class="qp-chip" onclick="quickAnalyze('SBIN')">SBIN</button>
+      <button class="qp-chip" onclick="quickAnalyze('HDFCBANK')">HDFCBANK</button>
+    </div>
+  </section>
+
+  <!-- LOADER -->
+  <div class="loader-wrapper hidden" id="loader">
+    <div class="loader-box">
+      <div class="loader-ring"></div>
+      <div class="loader-lines">
+        <span class="lline">Fetching market data...</span>
+        <span class="lline">Running quant analysis...</span>
+        <span class="lline">Computing predictions...</span>
+      </div>
+      <div class="loader-note" id="loaderNote"></div>
+    </div>
+  </div>
+
+  <!-- ERROR -->
+  <div class="error-wrapper hidden" id="errorBox">
+    <div class="error-card">
+      <span class="error-icon">✕</span>
+      <p class="error-msg" id="errorMsg"></p>
+      <button class="error-dismiss" onclick="dismissError()">DISMISS</button>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <main class="results hidden" id="results">
+    <div class="stock-header">
+      <div class="sh-left">
+        <div class="sh-ticker" id="sh_ticker"></div>
+        <div class="sh-name" id="sh_name"></div>
+      </div>
+      <div class="sh-right">
+        <div class="sh-price" id="sh_price"></div>
+        <div class="sh-change" id="sh_change"></div>
+      </div>
+    </div>
+
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="mc-title">RECOMMENDATION</div>
+        <div class="mc-value" id="mc_rec"></div>
+      </div>
+      <div class="metric-card">
+        <div class="mc-title">QUANT SCORE</div>
+        <div class="mc-value" id="mc_quant"></div>
+      </div>
+      <div class="metric-card">
+        <div class="mc-title">TREND</div>
+        <div class="mc-value" id="mc_trend"></div>
+      </div>
+      <div class="metric-card">
+        <div class="mc-title">RSI</div>
+        <div class="mc-value" id="mc_rsi"></div>
+      </div>
+    </div>
+
+    <div class="card pred-card">
+      <div class="card-label">NEXT DAY PROJECTION</div>
+      <div class="prediction-row">
+        <div>
+          <div class="pred-label">CURRENT</div>
+          <div class="pred-value" id="pred_current"></div>
+        </div>
+        <div class="pred-arrow">→</div>
+        <div>
+          <div class="pred-label">PROJECTED</div>
+          <div class="pred-value" id="pred_future"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card chart-card">
+      <div class="chart-title">30 DAY PRICE ACTION</div>
+      <div class="chart-container">
+        <canvas id="priceChart"></canvas>
+      </div>
+    </div>
+
+    <div class="card explain-card">
+      <div class="explain-title">QUANT ANALYSIS BREAKDOWN</div>
+      <div class="explain-list" id="explainList"></div>
+    </div>
+  </main>
 
   <script>
-    async function testAnalyze() {
-      const res = await fetch('/analyze', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({symbol: "RELIANCE"})
+    let chartInstance = null;
+    let _analysisRunning = false;
+
+    function updateClock() {
+      document.getElementById('liveTime').textContent = new Date().toLocaleTimeString('en-IN');
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // Show/Hide Functions
+    function showLoader() {
+      document.getElementById('results').classList.add('hidden');
+      document.getElementById('errorBox').classList.add('hidden');
+      document.getElementById('loader').classList.remove('hidden');
+    }
+
+    function hideLoader() {
+      document.getElementById('loader').classList.add('hidden');
+    }
+
+    function showError(msg) {
+      hideLoader();
+      document.getElementById('errorMsg').textContent = msg;
+      document.getElementById('errorBox').classList.remove('hidden');
+    }
+
+    function dismissError() {
+      document.getElementById('errorBox').classList.add('hidden');
+    }
+
+    async function analyzeStock() {
+      if (_analysisRunning) return;
+      const symbol = document.getElementById('stockInput').value.trim().toUpperCase();
+      if (!symbol) return showError("Please enter a stock symbol");
+
+      _analysisRunning = true;
+      document.getElementById('analyzeBtn').disabled = true;
+      showLoader();
+
+      try {
+        const res = await fetch('/analyze', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ symbol })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok || data.error) {
+          showError(data.error || "Failed to analyze stock");
+          return;
+        }
+
+        renderResults(data);
+      } catch (err) {
+        showError("Network error. Please try again.");
+      } finally {
+        _analysisRunning = false;
+        document.getElementById('analyzeBtn').disabled = false;
+      }
+    }
+
+    function renderResults(d) {
+      hideLoader();
+      document.getElementById('results').classList.remove('hidden');
+
+      document.getElementById('sh_ticker').textContent = d.symbol || '';
+      document.getElementById('sh_name').textContent = d.company_name || '';
+      document.getElementById('sh_price').textContent = '₹' + d.current_price;
+
+      // Recommendation
+      const recEl = document.getElementById('mc_rec');
+      recEl.textContent = d.recommendation || 'HOLD';
+      recEl.className = 'mc-value rec-' + (d.recommendation || 'hold').toLowerCase();
+
+      document.getElementById('mc_quant').textContent = (d.quant_score || 0) + '/100';
+      document.getElementById('mc_trend').textContent = d.trend || '';
+      document.getElementById('mc_rsi').textContent = (d.rsi || 0) + ' — ' + (d.rsi_signal || '');
+
+      // Prediction
+      document.getElementById('pred_current').textContent = '₹' + d.current_price;
+      const futureEl = document.getElementById('pred_future');
+      futureEl.textContent = '₹' + d.predicted_price + ' (+' + (d.price_change_pct || 0) + '%)';
+      futureEl.style.color = (d.price_change_pct || 0) > 0 ? '#00ff88' : '#ff4757';
+
+      // Explanations
+      const explainList = document.getElementById('explainList');
+      explainList.innerHTML = (d.explanations || []).map((text, i) => `
+        <div class="explain-item">
+          <span class="explain-num">${String(i+1).padStart(2,'0')}</span>
+          <span class="explain-text">${text}</span>
+        </div>
+      `).join('');
+
+      renderChart(d);
+    }
+
+    function renderChart(d) {
+      if (chartInstance) chartInstance.destroy();
+      
+      const ctx = document.getElementById('priceChart').getContext('2d');
+      
+      chartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: d.chart_dates || [],
+          datasets: [{
+            label: 'Price',
+            data: d.chart_closes || [],
+            borderColor: '#00d4ff',
+            backgroundColor: 'rgba(0, 212, 255, 0.1)',
+            fill: true,
+            tension: 0.4,
+            borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } }
+        }
       });
-      const data = await res.json();
-      alert(JSON.stringify(data, null, 2));
+    }
+
+    function quickAnalyze(sym) {
+      document.getElementById('stockInput').value = sym;
+      analyzeStock();
     }
   </script>
 </body>
