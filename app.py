@@ -119,7 +119,7 @@ def analyze():
 
     # ── Hard 12-second timeout around yfinance ────────────────────────────
     try:
-        with ThreadPoolExecutor(max_workers=1) as pool:
+        with ThreadPoolExecutor(max_workers=2) as pool:
             future = pool.submit(_fetch_data, nse_symbol)
             try:
                 hist, info = future.result(timeout=12)
