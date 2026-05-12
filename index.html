@@ -30,7 +30,7 @@
 
     <div>
       <h2>NSEPredict Quant</h2>
-      <p>Jim Simons Inspired NSE Analytics</p>
+      <p>Quantitative NSE Analytics</p>
     </div>
 
   </div>
@@ -50,7 +50,7 @@
     </h1>
 
     <p>
-      Analyze Indian NSE stocks using trend, momentum, volatility, confidence scoring and quantitative signals.
+      Analyze Indian NSE stocks using trend, momentum, volatility, confidence scoring and quant-based signals.
     </p>
 
   </section>
@@ -89,25 +89,15 @@
 
       <div class="chips-row">
 
-        <button type="button" onclick="setTicker('TCS')">
-          TCS
-        </button>
+        <button type="button" onclick="setTicker('TCS')">TCS</button>
 
-        <button type="button" onclick="setTicker('RELIANCE')">
-          RELIANCE
-        </button>
+        <button type="button" onclick="setTicker('RELIANCE')">RELIANCE</button>
 
-        <button type="button" onclick="setTicker('INFY')">
-          INFY
-        </button>
+        <button type="button" onclick="setTicker('INFY')">INFY</button>
 
-        <button type="button" onclick="setTicker('HDFCBANK')">
-          HDFCBANK
-        </button>
+        <button type="button" onclick="setTicker('HDFCBANK')">HDFCBANK</button>
 
-        <button type="button" onclick="setTicker('WIPRO')">
-          WIPRO
-        </button>
+        <button type="button" onclick="setTicker('WIPRO')">WIPRO</button>
 
       </div>
 
@@ -180,13 +170,9 @@
 
         <div>
 
-          <p class="label">
-            Recommendation
-          </p>
+          <p class="label">Recommendation</p>
 
-          <h1>
-            {{ result.signal }}
-          </h1>
+          <h1>{{ result.signal }}</h1>
 
         </div>
 
@@ -204,7 +190,7 @@
 
         {% else %}
 
-          Quant signals indicate possible downside risk.
+          Quant signals indicate downside risk.
 
         {% endif %}
 
@@ -213,6 +199,8 @@
     </div>
 
   </section>
+
+  <!-- QUANT ANALYTICS SECTION -->
 
   <section class="results-grid">
 
@@ -251,25 +239,15 @@
 
     <ul>
 
-      <li>
-        Fetches NSE stock data using Yahoo Finance
-      </li>
+      <li>Fetches NSE stock data using Yahoo Finance</li>
 
-      <li>
-        Uses quantitative trend and momentum analysis
-      </li>
+      <li>Uses NumPy quantitative trend analysis</li>
 
-      <li>
-        Calculates volatility-based risk scoring
-      </li>
+      <li>Calculates volatility-based risk scoring</li>
 
-      <li>
-        Generates BUY / HOLD / SELL recommendation
-      </li>
+      <li>Generates BUY / HOLD / SELL recommendation</li>
 
-      <li>
-        Inspired by statistical quant investing concepts
-      </li>
+      <li>Inspired by quantitative investing systems</li>
 
     </ul>
 
