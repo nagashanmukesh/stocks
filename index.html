@@ -1,17 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
-  <title>NSEPredict • Indian Stock Predictor</title>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>NSEPredict</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
- <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/style.css">
 </head>
 
 <body>
@@ -22,12 +23,16 @@
 <header class="navbar">
 
   <div class="logo-box">
-    <div class="logo-icon">₹</div>
+
+    <div class="logo-icon">
+      ₹
+    </div>
 
     <div>
       <h2>NSEPredict</h2>
       <p>Indian Stock Predictor</p>
     </div>
+
   </div>
 
   <div class="nav-badge">
@@ -45,7 +50,7 @@
     </h1>
 
     <p>
-      Enter any NSE stock symbol and get a simple AI-based next-day stock prediction with BUY/SELL signals.
+      Enter any NSE stock symbol and get a simple AI-based prediction with BUY/SELL signals.
     </p>
 
   </section>
@@ -69,23 +74,40 @@
         >
 
         <button type="submit" id="submitBtn">
-          <span class="btn-text">Predict</span>
-          <span class="btn-loader">Loading...</span>
+
+          <span class="btn-text">
+            Predict
+          </span>
+
+          <span class="btn-loader">
+            Loading...
+          </span>
+
         </button>
 
       </div>
 
       <div class="chips-row">
 
-        <button type="button" onclick="setTicker('TCS')">TCS</button>
+        <button type="button" onclick="setTicker('TCS')">
+          TCS
+        </button>
 
-        <button type="button" onclick="setTicker('RELIANCE')">RELIANCE</button>
+        <button type="button" onclick="setTicker('RELIANCE')">
+          RELIANCE
+        </button>
 
-        <button type="button" onclick="setTicker('INFY')">INFY</button>
+        <button type="button" onclick="setTicker('INFY')">
+          INFY
+        </button>
 
-        <button type="button" onclick="setTicker('HDFCBANK')">HDFCBANK</button>
+        <button type="button" onclick="setTicker('HDFCBANK')">
+          HDFCBANK
+        </button>
 
-        <button type="button" onclick="setTicker('WIPRO')">WIPRO</button>
+        <button type="button" onclick="setTicker('WIPRO')">
+          WIPRO
+        </button>
 
       </div>
 
@@ -94,12 +116,15 @@
   </section>
 
   {% if error %}
+
   <section class="glass-card error-card">
     ⚠ {{ error }}
   </section>
+
   {% endif %}
 
   {% if result %}
+
   <section class="results-grid">
 
     <div class="glass-card stock-card full-width">
@@ -130,11 +155,17 @@
       <h2>₹{{ result.predicted_price }}</h2>
 
       <span>
-        {% if result.change_pct >= 0 %}
+
+        {% if result.change_pct > 0 %}
+
           ▲ +{{ result.change_pct }}%
+
         {% else %}
+
           ▼ {{ result.change_pct }}%
+
         {% endif %}
+
       </span>
 
     </div>
@@ -148,18 +179,29 @@
         </div>
 
         <div>
-          <p class="label">Signal</p>
-          <h1>{{ result.signal }}</h1>
+
+          <p class="label">
+            Signal
+          </p>
+
+          <h1>
+            {{ result.signal }}
+          </h1>
+
         </div>
 
       </div>
 
       <div class="signal-right">
 
-        {% if result.signal == "BUY" %}
-          Model predicts upward momentum tomorrow.
+        {% if result.signal == 'BUY' %}
+
+          Model predicts upward movement tomorrow.
+
         {% else %}
+
           Model predicts possible downside tomorrow.
+
         {% endif %}
 
       </div>
@@ -167,6 +209,7 @@
     </div>
 
   </section>
+
   {% endif %}
 
   <section class="glass-card info-card">
@@ -174,10 +217,23 @@
     <h3>How It Works</h3>
 
     <ul>
-      <li>Fetches NSE stock data using Yahoo Finance</li>
-      <li>Uses NumPy linear trend prediction</li>
-      <li>Predicts possible next-day closing price</li>
-      <li>Generates simple BUY/SELL signal</li>
+
+      <li>
+        Fetches NSE stock data using Yahoo Finance
+      </li>
+
+      <li>
+        Uses NumPy trend prediction
+      </li>
+
+      <li>
+        Predicts next-day price movement
+      </li>
+
+      <li>
+        Generates BUY/SELL signal
+      </li>
+
     </ul>
 
   </section>
@@ -204,7 +260,7 @@ function setTicker(stock) {
 
 const form = document.getElementById('stockForm');
 
-form.addEventListener('submit', () => {
+form.addEventListener('submit', function () {
 
   document.querySelector('.btn-text').style.display = 'none';
 
