@@ -14,6 +14,8 @@ def serve_css():
     return app.send_static_file('style.css')
 
 
+# ---------------- SYMBOL ---------------- #
+
 def normalize_symbol(symbol):
 
     symbol = symbol.strip().upper()
@@ -23,6 +25,8 @@ def normalize_symbol(symbol):
 
     return symbol
 
+
+# ---------------- FETCH DATA ---------------- #
 
 def fetch_closes(symbol):
 
@@ -43,6 +47,8 @@ def fetch_closes(symbol):
     return df["Close"].values.astype(float)
 
 
+# ---------------- PRICE PREDICTION ---------------- #
+
 def predict_next_price(closes):
 
     x = np.arange(len(closes))
@@ -56,7 +62,7 @@ def predict_next_price(closes):
     return round(float(predicted), 2)
 
 
-# -------- QUANT SIGNALS -------- #
+# ---------------- QUANT SIGNALS ---------------- #
 
 def calculate_trend(closes):
 
@@ -99,7 +105,7 @@ def calculate_confidence(change_pct):
     return min(round(confidence, 2), 95)
 
 
-# -------- MAIN ROUTE -------- #
+# ---------------- MAIN ROUTE ---------------- #
 
 @app.route("/", methods=["GET", "POST"])
 def index():
@@ -130,7 +136,8 @@ def index():
                     2
                 )
 
-                # Quant signals
+                # -------- QUANT SIGNALS -------- #
+
                 trend = calculate_trend(closes)
 
                 momentum = calculate_momentum(closes)
@@ -139,38 +146,80 @@ def index():
 
                 confidence = calculate_confidence(change_pct)
 
-                # Quant scoring
+                # -------- IMPROVED QUANT SCORING -------- #
+
                 score = 50
 
-                if trend == "Bullish":
+                # Prediction direction
+                if predicted_price > current_price:
                     score += 20
+                else:
+                    score -= 20
+
+                # Trend strength
+                if trend == "Bullish":
+                    score += 15
                 else:
                     score -= 10
 
+                # Momentum
                 if momentum == "Strong":
-                    score += 15
+                    score += 10
+                else:
+                    score -= 5
 
+                # Risk analysis
                 if risk == "Low":
                     score += 10
+                elif risk == "Medium":
+                    score += 0
+                else:
+                    score -= 10
 
-                if confidence > 70:
-                    score += 10
+                # Confidence
+                if confidence > 80:
+                    score += 15
+                elif confidence > 65:
+                    score += 8
+                else:
+                    score -= 5
 
-                # Final recommendation
+                # Clamp score
+                score = max(0, min(score, 100))
+
+                # -------- FINAL RECOMMENDATION -------- #
+
                 if score >= 75:
+
                     signal = "BUY"
                     signal_class = "buy"
                     signal_icon = "↑"
 
+                    explanation = (
+                        "Strong bullish trend with favorable quant signals."
+                    )
+
                 elif score >= 50:
+
                     signal = "HOLD"
                     signal_class = "hold"
                     signal_icon = "→"
 
+                    explanation = (
+                        "Mixed market conditions with moderate confidence."
+                    )
+
                 else:
+
                     signal = "SELL"
                     signal_class = "sell"
                     signal_icon = "↓"
+
+                    explanation = (
+                        "Weak momentum and higher downside risk detected."
+                    )
+
+                # -------- RESULT -------- #
 
                 result = {
                     "symbol": symbol,
@@ -184,7 +233,8 @@ def index():
                     "momentum": momentum,
                     "risk": risk,
                     "confidence": confidence,
-                    "score": score
+                    "score": score,
+                    "explanation": explanation
                 }
 
             except ValueError as e:
@@ -193,7 +243,10 @@ def index():
 
             except Exception:
 
-                error = "Yahoo Finance rate limit reached. Try again after a minute."
+                error = (
+                    "Yahoo Finance rate limit reached. "
+                    "Try again after a minute."
+                )
 
     return render_template(
         "index.html",
