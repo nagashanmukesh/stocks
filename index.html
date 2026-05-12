@@ -1,5 +1,134 @@
 <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+  <title>NSEPredict • Indian Stock Predictor</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+<div class="background-glow glow-1"></div>
+<div class="background-glow glow-2"></div>
+
+<header class="navbar">
+
+  <div class="logo-box">
+    <div class="logo-icon">₹</div>
+
+    <div>
+      <h2>NSEPredict</h2>
+      <p>Indian Stock Predictor</p>
+    </div>
+  </div>
+
+  <div class="nav-badge">
+    NSE • India
+  </div>
+
+</header>
+
+<main class="container">
+
+  <section class="hero-section">
+
+    <h1>
+      Predict Indian <span>Stock Prices</span>
+    </h1>
+
+    <p>
+      Enter any NSE stock symbol and get a simple AI-based next-day stock prediction with BUY/SELL signals.
+    </p>
+
+  </section>
+
+  <section class="glass-card search-card">
+
+    <div class="section-top">
+      <h3>Search NSE Stock</h3>
+      <span>Live Yahoo Finance Data</span>
+    </div>
+
+    <form method="POST" action="/" id="stockForm">
+
+      <div class="input-group">
+
+        <input
+          type="text"
+          name="symbol"
+          placeholder="TCS / RELIANCE / INFY"
+          required
+        >
+
+        <button type="submit" id="submitBtn">
+          <span class="btn-text">Predict</span>
+          <span class="btn-loader">Loading...</span>
+        </button>
+
+      </div>
+
+      <div class="chips-row">
+
+        <button type="button" onclick="setTicker('TCS')">TCS</button>
+
+        <button type="button" onclick="setTicker('RELIANCE')">RELIANCE</button>
+
+        <button type="button" onclick="setTicker('INFY')">INFY</button>
+
+        <button type="button" onclick="setTicker('HDFCBANK')">HDFCBANK</button>
+
+        <button type="button" onclick="setTicker('WIPRO')">WIPRO</button>
+
+      </div>
+
+    </form>
+
+  </section>
+
+  {% if error %}
+  <section class="glass-card error-card">
+    ⚠ {{ error }}
+  </section>
+  {% endif %}
+
+  {% if result %}
+  <section class="results-grid">
+
+    <div class="glass-card stock-card full-width">
+
+      <div>
+        <p class="label">Stock Symbol</p>
+        <h2>{{ result.symbol }}</h2>
+      </div>
+
+      <div class="status-dot"></div>
+
+    </div>
+
+    <div class="glass-card metric-card">
+
+      <p class="label">Current Price</p>
+
+      <h2>₹{{ result.current_price }}</h2>
+
+      <span>Live Closing Price</span>
+
+    </div>
+
+    <div class="glass-card metric-card">
+
+      <p class="label">Predicted Price</p>
+
       <h2>₹{{ result.predicted_price }}</h2>
+
       <span>
         {% if result.change_pct >= 0 %}
           ▲ +{{ result.change_pct }}%
@@ -7,31 +136,41 @@
           ▼ {{ result.change_pct }}%
         {% endif %}
       </span>
+
     </div>
 
     <div class="glass-card signal-card {{ result.signal_class }} full-width">
+
       <div class="signal-left">
-        <div class="signal-icon">{{ result.signal_icon }}</div>
+
+        <div class="signal-icon">
+          {{ result.signal_icon }}
+        </div>
 
         <div>
           <p class="label">Signal</p>
           <h1>{{ result.signal }}</h1>
         </div>
+
       </div>
 
       <div class="signal-right">
+
         {% if result.signal == "BUY" %}
           Model predicts upward momentum tomorrow.
         {% else %}
           Model predicts possible downside tomorrow.
         {% endif %}
+
       </div>
+
     </div>
 
   </section>
   {% endif %}
 
   <section class="glass-card info-card">
+
     <h3>How It Works</h3>
 
     <ul>
@@ -40,11 +179,13 @@
       <li>Predicts possible next-day closing price</li>
       <li>Generates simple BUY/SELL signal</li>
     </ul>
+
   </section>
 
 </main>
 
 <footer class="footer">
+
   <p>
     ⚠ Educational purpose only. Not financial advice.
   </p>
@@ -52,6 +193,7 @@
   <span>
     Built with Flask + NumPy + yfinance
   </span>
+
 </footer>
 
 <script>
@@ -63,9 +205,13 @@ function setTicker(stock) {
 const form = document.getElementById('stockForm');
 
 form.addEventListener('submit', () => {
+
   document.querySelector('.btn-text').style.display = 'none';
+
   document.querySelector('.btn-loader').style.display = 'inline';
+
   document.getElementById('submitBtn').disabled = true;
+
 });
 
 </script>
