@@ -1,8 +1,9 @@
+import yfinance as yf
+yf.set_tz_cache_location("/tmp")
 import os
 import warnings
 warnings.filterwarnings('ignore')
 
-yf.set_tz_cache_location("/tmp")
 
 from flask import Flask, request, jsonify, render_template
 import yfinance as yf
