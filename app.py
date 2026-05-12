@@ -9,7 +9,7 @@ app = Flask(
     static_folder='.'
 )
 
-# Serve CSS manually
+# Serve CSS manually for flat structure
 @app.route('/style.css')
 def serve_css():
     return app.send_static_file('style.css')
@@ -183,8 +183,6 @@ def index():
                     2
                 )
 
-                # -------- SIGNALS -------- #
-
                 trend = calculate_trend(closes)
 
                 momentum = calculate_momentum(closes)
@@ -199,8 +197,6 @@ def index():
                     predicted_price
                 )
 
-                # -------- VOLUME ANALYSIS -------- #
-
                 avg_volume = df["Volume"][-20:].mean()
 
                 latest_volume = df["Volume"].iloc[-1]
@@ -209,8 +205,6 @@ def index():
                     volume_signal = "High Activity"
                 else:
                     volume_signal = "Normal"
-
-                # -------- SENTIMENT -------- #
 
                 if trend == "Bullish" and momentum == "Strong":
                     sentiment = "Positive"
@@ -221,35 +215,30 @@ def index():
                 else:
                     sentiment = "Neutral"
 
-                # -------- QUANT SCORE -------- #
+                # ---------------- QUANT SCORE ---------------- #
 
                 score = 50
 
-                # Prediction direction
                 if predicted_price > current_price:
                     score += 20
                 else:
                     score -= 20
 
-                # Trend
                 if trend == "Bullish":
                     score += 15
                 else:
                     score -= 10
 
-                # Momentum
                 if momentum == "Strong":
                     score += 10
                 else:
                     score -= 5
 
-                # Risk
                 if risk == "Low":
                     score += 10
                 elif risk == "High":
                     score -= 10
 
-                # Confidence
                 if confidence > 80:
                     score += 15
                 elif confidence > 65:
@@ -257,16 +246,14 @@ def index():
                 else:
                     score -= 5
 
-                # RSI Logic
                 if rsi < 30:
                     score += 10
                 elif rsi > 70:
                     score -= 10
 
-                # Clamp score
                 score = max(0, min(score, 100))
 
-                # -------- FINAL SIGNAL -------- #
+                # ---------------- SIGNAL ---------------- #
 
                 if score >= 75:
 
@@ -286,7 +273,7 @@ def index():
                     signal_class = "sell"
                     signal_icon = "↓"
 
-                # -------- AI EXPLANATION -------- #
+                # ---------------- AI EXPLANATION ---------------- #
 
                 reasons = []
 
@@ -309,8 +296,6 @@ def index():
 
                 if explanation == "":
                     explanation = "Mixed quant market conditions detected"
-
-                # -------- RESULT -------- #
 
                 result = {
                     "symbol": symbol,
@@ -349,4 +334,4 @@ def index():
 
 
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=True)
