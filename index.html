@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>NSEPredict</title>
+  <title>NSEPredict Quant</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -29,14 +29,14 @@
     </div>
 
     <div>
-      <h2>NSEPredict</h2>
-      <p>Indian Stock Predictor</p>
+      <h2>NSEPredict Quant</h2>
+      <p>Jim Simons Inspired NSE Analytics</p>
     </div>
 
   </div>
 
   <div class="nav-badge">
-    NSE • India
+    NSE • Quant Engine
   </div>
 
 </header>
@@ -46,11 +46,11 @@
   <section class="hero-section">
 
     <h1>
-      Predict Indian <span>Stock Prices</span>
+      Quantitative <span>Stock Analysis</span>
     </h1>
 
     <p>
-      Enter any NSE stock symbol and get a simple AI-based prediction with BUY/SELL signals.
+      Analyze Indian NSE stocks using trend, momentum, volatility, confidence scoring and quantitative signals.
     </p>
 
   </section>
@@ -76,7 +76,7 @@
         <button type="submit" id="submitBtn">
 
           <span class="btn-text">
-            Predict
+            Analyze
           </span>
 
           <span class="btn-loader">
@@ -144,7 +144,7 @@
 
       <h2>₹{{ result.current_price }}</h2>
 
-      <span>Live Closing Price</span>
+      <span>Latest Market Price</span>
 
     </div>
 
@@ -181,7 +181,7 @@
         <div>
 
           <p class="label">
-            Signal
+            Recommendation
           </p>
 
           <h1>
@@ -196,16 +196,49 @@
 
         {% if result.signal == 'BUY' %}
 
-          Model predicts upward movement tomorrow.
+          Quant model indicates bullish probability.
+
+        {% elif result.signal == 'HOLD' %}
+
+          Market conditions appear neutral currently.
 
         {% else %}
 
-          Model predicts possible downside tomorrow.
+          Quant signals indicate possible downside risk.
 
         {% endif %}
 
       </div>
 
+    </div>
+
+  </section>
+
+  <section class="results-grid">
+
+    <div class="glass-card metric-card">
+      <p class="label">Trend</p>
+      <h2>{{ result.trend }}</h2>
+    </div>
+
+    <div class="glass-card metric-card">
+      <p class="label">Momentum</p>
+      <h2>{{ result.momentum }}</h2>
+    </div>
+
+    <div class="glass-card metric-card">
+      <p class="label">Risk</p>
+      <h2>{{ result.risk }}</h2>
+    </div>
+
+    <div class="glass-card metric-card">
+      <p class="label">Confidence</p>
+      <h2>{{ result.confidence }}%</h2>
+    </div>
+
+    <div class="glass-card metric-card full-width">
+      <p class="label">Quant Score</p>
+      <h2>{{ result.score }}/100</h2>
     </div>
 
   </section>
@@ -223,15 +256,19 @@
       </li>
 
       <li>
-        Uses NumPy trend prediction
+        Uses quantitative trend and momentum analysis
       </li>
 
       <li>
-        Predicts next-day price movement
+        Calculates volatility-based risk scoring
       </li>
 
       <li>
-        Generates BUY/SELL signal
+        Generates BUY / HOLD / SELL recommendation
+      </li>
+
+      <li>
+        Inspired by statistical quant investing concepts
       </li>
 
     </ul>
