@@ -4,7 +4,24 @@
 from flask import Flask, render_template, request
 import yfinance as yf
 import numpy as np
-from sklearn.linear_model import LinearRegression
+def predict_next_price(df):
+    """
+    Simple prediction using NumPy linear trend.
+    """
+
+    closes = df["Close"].values
+
+    # Create x-axis values
+    x = np.arange(len(closes))
+
+    # Fit straight trend line
+    slope, intercept = np.polyfit(x, closes, 1)
+
+    # Predict next day
+    next_day = len(closes)
+    predicted_price = slope * next_day + intercept
+
+    return round(float(predicted_price), 2)
 
 # Create the Flask app
 app = Flask(
